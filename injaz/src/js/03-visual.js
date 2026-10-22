@@ -2,6 +2,7 @@
 const SEC=[
   {id:'home',n:'الرئيسية',sub:'نظرة واحدة على يومك كله',skin:'night',em:'armillary',c:'#8aa4f0'},
   {id:'study',n:'المذاكرة',sub:'جلسات مركّزة بلا تشتت',skin:'night',em:'crystal',c:'#8aa4f0'},
+  {id:'exam',n:'الامتحانات',sub:'تقييم أسبوعي وتدريب بالحلول',skin:'night',em:'star',c:'#8aa4f0'},
   {id:'tasks',n:'المهام',sub:'اكتب، رتّب، أنجز',skin:'night',em:'cubes',c:'#8aa4f0'},
   {id:'log',n:'السجل اليومي',sub:'ماذا فعلت اليوم وكيف كان شعورك',skin:'night',em:'book',c:'#8aa4f0'},
   {id:'gym',n:'التمارين',sub:'الجيم، الأوزان، والتقدّم',skin:'night',em:'dumbbell',c:'#8aa4f0'},

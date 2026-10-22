@@ -27,7 +27,7 @@ function boot(){
   const h=(location.hash||'').slice(1),tab=SEC.find(s=>s.id===h)?h:st.get('tab','home');
   go(tab);
   clock();setInterval(clock,20000);
-  alarmInit();natInit();
+  alarmInit();natInit();loadRemoteBank();
   if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 }
 addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(SEC.find(s=>s.id===h)&&h!==curSec)go(h)});

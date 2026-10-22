@@ -62,14 +62,25 @@ function showWelcome(){
 
 /* ----- الكتب ----- */
 const bookKey=s=>s.k+'|'+eduLabel();
+function bkLinks(s){
+  const e=eduOf();if(!e||typeof BKCAT==='undefined')return [];
+  return (BKCAT[e.stage+e.grade]||[]).filter(x=>x[0]===s.k);
+}
+function bkBtn(x){return '<a class="btn s" href="'+BK_BASE+x[2].split('/').map(encodeURIComponent).join('/')+'" target="_blank" rel="noopener">PDF'+(x[1]?' · '+esc(x[1]):'')+'</a>'}
 function booksCard(){
   const e=eduOf();if(!e)return '';
+  const cat=(typeof BKCAT!=='undefined'&&BKCAT[e.stage+e.grade])||[];
   const rows=mySubs().map(s=>{
-    const f=libItems.find(x=>x.bk===bookKey(s));
-    return '<li style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 0"><i style="width:10px;height:10px;border-radius:50%;background:'+s.c+'"></i><span class="t" style="flex:1;min-width:140px">'+esc(bookTitle(s))+'</span>'+
-    (f?'<button class="btn s" data-a="libopen" data-id="'+f.id+'">فتح</button>':'<a class="btn g s" href="'+bookSearch(s)+'" target="_blank" rel="noopener">بحث</a>')+
+    const f=libItems.find(x=>x.bk===bookKey(s)),L=bkLinks(s);
+    return '<li style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 0"><i style="width:10px;height:10px;border-radius:50%;background:'+s.c+'"></i><span class="t" style="flex:1;min-width:140px">'+esc(bookTitle(s))+'</span>'+
+    (f?'<button class="btn s" data-a="libopen" data-id="'+f.id+'">فتح المحفوظ</button>':'')+
+    L.map(bkBtn).join('')+
+    (!f&&!L.length?'<a class="btn g s" href="'+bookSearch(s)+'" target="_blank" rel="noopener">بحث</a>':'')+
     '<label class="btn g s">'+(f?'استبدال':'رفع')+'<input type="file" accept="application/pdf,.pdf" hidden data-c="bookup" data-k="'+s.k+'"></label></li>'}).join('');
-  return '<div class="card" style="margin-bottom:12px"><h3>كتب مرحلتي</h3><p class="mut sm">'+esc(eduLabel())+'. «بحث» يفتح نتائج عن كتاب الوزارة الرسمي، وبعد تنزيله ارفعه هنا ليبقى معك بلا إنترنت. الكتب على جهازك فقط.</p><ul class="list">'+rows+'</ul><div class="row" style="margin-top:8px"><a class="btn g s" href="https://moe.gov.eg" target="_blank" rel="noopener">موقع الوزارة</a><a class="btn g s" href="https://study.ekb.eg" target="_blank" rel="noopener">بنك المعرفة المصري</a></div></div>';
+  const ex=cat.filter(x=>x[0]==='x');
+  const exh=ex.length?'<h4 style="margin:12px 0 4px">كتب أخرى في مرحلتك</h4><ul class="list">'+ex.map(x=>'<li style="display:flex;align-items:center;gap:8px;padding:6px 0"><span class="t" style="flex:1">'+esc(x[1])+'</span><a class="btn s" href="'+BK_BASE+x[2].split('/').map(encodeURIComponent).join('/')+'" target="_blank" rel="noopener">PDF</a></li>').join('')+'</ul>':'';
+  const note=cat.length?'أزرار «PDF» تفتح كتاب الوزارة الرسمي (الفصل الأول 2026-2027) من المكتبة الإلكترونية لوزارة التربية والتعليم. المواد بلا زر PDF غير منشورة بكتاب في المكتبة حالياً (مثل الفنية والموسيقى والرياضة)، فاستخدم «بحث» أو ارفع كتابك.':'كتب هذه المرحلة غير منشورة بعد في المكتبة الإلكترونية للوزارة. استخدم «بحث» أو ارفع كتابك.';
+  return '<div class="card" style="margin-bottom:12px"><h3>كتب مرحلتي</h3><p class="mut sm">'+esc(eduLabel())+'. '+note+' يمكنك رفع نسخة لتبقى معك بلا إنترنت (على جهازك فقط).</p><ul class="list">'+rows+'</ul>'+exh+'<div class="row" style="margin-top:8px"><a class="btn g s" href="'+BK_LIB+'" target="_blank" rel="noopener">المكتبة الإلكترونية للوزارة</a><a class="btn g s" href="https://moe.gov.eg" target="_blank" rel="noopener">موقع الوزارة</a><a class="btn g s" href="https://study.ekb.eg" target="_blank" rel="noopener">بنك المعرفة المصري</a></div></div>';
 }
 CHG.bookup=async t=>{
   const f=t.files[0];if(!f)return;const s=mySubs().find(x=>x.k===t.dataset.k);if(!s)return;

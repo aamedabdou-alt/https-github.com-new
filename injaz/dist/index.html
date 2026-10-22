@@ -353,6 +353,18 @@ body.lt .eyb b{color:#3d5bd0}
 .whochip{border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wis{margin:10px 0 0;max-width:640px;line-height:1.9;color:var(--mut)}
 .hero #who{font-size:13px;margin-top:2px}
+
+.exq{font-size:1.15rem;line-height:1.9;margin:6px 0 14px;font-weight:500}
+.exopts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:right;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:inherit;font:inherit;cursor:pointer;transition:border-color .15s,background .15s}
+.opt:hover{border-color:color-mix(in srgb,var(--acc) 55%,transparent)}
+.opt.sel{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 16%,var(--card2))}
+.exdots{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.exd{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--card2);color:var(--mut);font:inherit;font-size:12px;cursor:pointer}
+.exd.ans{color:var(--ink);border-color:color-mix(in srgb,var(--acc) 45%,transparent)}.exd.cur{background:var(--acc);color:#0b0f14;border-color:var(--acc)}
+.exscore{font-size:2.4rem;font-weight:700;text-align:center;margin:8px 0 2px}
+.exrev{padding:10px 12px;border-radius:12px;margin-top:10px;border:1px solid var(--line);border-inline-start:4px solid #6fcf97}
+.exrev.no{border-inline-start-color:#eb6f6f}
 </style>
 </head>
 <body>
@@ -690,6 +702,7 @@ const TAGN={study:'مذاكرة',pray:'عبادة',lesson:'درس',gym:'تمري
 const SEC=[
   {id:'home',n:'الرئيسية',sub:'نظرة واحدة على يومك كله',skin:'night',em:'armillary',c:'#8aa4f0'},
   {id:'study',n:'المذاكرة',sub:'جلسات مركّزة بلا تشتت',skin:'night',em:'crystal',c:'#8aa4f0'},
+  {id:'exam',n:'الامتحانات',sub:'تقييم أسبوعي وتدريب بالحلول',skin:'night',em:'star',c:'#8aa4f0'},
   {id:'tasks',n:'المهام',sub:'اكتب، رتّب، أنجز',skin:'night',em:'cubes',c:'#8aa4f0'},
   {id:'log',n:'السجل اليومي',sub:'ماذا فعلت اليوم وكيف كان شعورك',skin:'night',em:'book',c:'#8aa4f0'},
   {id:'gym',n:'التمارين',sub:'الجيم، الأوزان، والتقدّم',skin:'night',em:'dumbbell',c:'#8aa4f0'},
@@ -794,7 +807,7 @@ const libTx=(m,fn)=>DB.tx('ab-lib','f',{keyPath:'id',autoIncrement:true},m,fn);
 const bgTx=(m,fn)=>DB.tx('ab-bg','k',{},m,fn);
 
 /* ========== التنقل ========== */
-const ICO={home:'M3 11l9-8 9 8v10h-6v-6H9v6H3z',study:'M2 5h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z',tasks:'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9',log:'M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6zM9 3v18M12 8h4M12 12h4',gym:'M6 6v12M3 9v6M18 6v12M21 9v6M6 12h12',food:'M12 7c-3-3-8-1-8 5 0 5 3 9 5 9 1 0 2-.7 3-.7s2 .7 3 .7c2 0 5-4 5-9 0-6-5-8-8-5zM12 7c0-2 1-4 3-4',water:'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z',routine:'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',alarm:'M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0',read:'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',notes:'M4 20l1-5L16 4l4 4L9 19zM14 6l4 4',lib:'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',insp:'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',set:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',more:'M4 7h16M4 12h16M4 17h16'};
+const ICO={exam:'M9 3h6l1 2h3v16H5V5h3zM9 12l2 2 4-4',home:'M3 11l9-8 9 8v10h-6v-6H9v6H3z',study:'M2 5h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z',tasks:'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9',log:'M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6zM9 3v18M12 8h4M12 12h4',gym:'M6 6v12M3 9v6M18 6v12M21 9v6M6 12h12',food:'M12 7c-3-3-8-1-8 5 0 5 3 9 5 9 1 0 2-.7 3-.7s2 .7 3 .7c2 0 5-4 5-9 0-6-5-8-8-5zM12 7c0-2 1-4 3-4',water:'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z',routine:'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',alarm:'M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0',read:'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',notes:'M4 20l1-5L16 4l4 4L9 19zM14 6l4 4',lib:'M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',insp:'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',set:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',more:'M4 7h16M4 12h16M4 17h16'};
 const NAVPRI=['home','study','tasks','routine'];
 const tabBtn=(s,cls)=>'<button class="tab'+(cls||'')+'" data-a="go" data-g="'+s.id+'" style="--c:'+s.c+'" aria-label="'+s.n+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+ICO[s.id]+'"/></svg><span>'+s.n+'</span></button>';
 function buildShell(){
@@ -1081,6 +1094,7 @@ RD.home=()=>{
     card('منبه الصباح','<div class="b" style="font-size:1.15rem">'+al.text+'</div><div class="mut sm">'+al.sub+'</div><div class="row" style="margin-top:10px"><button class="btn s" data-a="go" data-g="alarm">إعداد المنبه</button>'+(al.canCancel?'<button class="btn d s" data-a="almSkip">'+(al.skipped?'إعادة تفعيل منبه الغد':'إلغاء منبه الغد')+'</button>':'')+'</div>')+
     card('تقدّم اليوم',rings,{cls:'full'})+
     card('الدرس القادم',nl?'<div class="b" style="font-size:1.15rem">'+esc(nl.x.label)+'</div><div class="mut">'+(nl.k===k?'اليوم':DN[wdOf(nl.k)])+' · '+t12(nl.x.t0)+'</div><div class="ac b" style="margin-top:4px">بعد '+dur(nl.mins)+'</div>':'<div class="mut">لا دروس قادمة هذا الأسبوع</div>')+
+    card('امتحان الأسبوع',(()=>{const wr=weekResult();return wr?'<div class="b" style="font-size:1.25rem">'+wr.score+' من '+wr.total+'</div><div class="mut sm">'+grade(pctOf(wr))+' · نتيجة هذا الأسبوع</div>':'<div class="mut sm">عشرة أسئلة من موادك بحلولها، متاح الآن.</div>'})()+'<div class="row" style="margin-top:10px"><button class="btn s" data-a="go" data-g="exam">'+(weekResult()?'الامتحانات':'ابدأ الآن')+'</button></div>')+
     card('اختصارات','<div class="row"><button class="btn" data-a="homeFocus">ابدأ تركيز</button><button class="btn g" data-a="homeWater">+ كوب ماء</button><button class="btn g" data-a="go" data-g="tasks">مهمة جديدة</button><button class="btn g" data-a="go" data-g="notes">ملاحظة سريعة</button></div>')+
     card('مهام اليوم',tl.length?'<ul class="list">'+tl.map(t=>'<li><input type="checkbox" data-c="tchk" data-id="'+t.id+'" aria-label="تم"><span class="t">'+esc(t.t)+'</span>'+taskBadge(t)+'</li>').join('')+'</ul>':'<div class="empty">لا مهام لليوم. استمتع أو أضف مهمة.</div>',{r:T0.done+'/'+(T0.done+T0.open)})+
     '</div>';
@@ -1911,7 +1925,7 @@ function alarmInit(){ensureOverlay();setInterval(alarmTick,1000);alarmTick()}
    - البيانات تُحفظ محلياً أولاً (تعمل بلا إنترنت) ثم تُرفع إلى جدول user_kv.
    - كل مستخدم يرى صفوفه فقط (RLS في قاعدة البيانات). */
 const CLOUD={on:false,client:null,user:null,q:{},timer:null,busy:false,last:0,err:'',off:false};
-const LOCAL_ONLY=['tab','snooze','wrem','wsh'];
+const LOCAL_ONLY=['tab','snooze','wrem','wsh','xbank'];
 const lsk=k=>'ab:'+k;
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
@@ -2140,6 +2154,11 @@ async function natSync(force){
   }catch(e){}
 }
 
+/* كتالوج كتب الوزارة الرسمية (المكتبة الإلكترونية 2026-2027، الفصل الأول) — مولَّد آلياً */
+const BK_BASE='https://elearnningcontent.blob.core.windows.net/elearnningcontent/2026_2027/';
+const BK_LIB='https://ellibrary.moe.gov.eg/books/';
+const BKCAT={"prep1":[["ar","","Prepratory/Prepratory1/Term1/StudentBook/Arabic_Prep1_T1.pdf"],["en","","Prepratory/Prepratory1/Term1/StudentBook/English_Prep1_T1.pdf"],["l2","الإنجليزية","Prepratory/Prepratory1/Term1/StudentBook/English_sec_lang_prep1_t1.pdf"],["math","عربي","Prepratory/Prepratory1/Term1/StudentBook/Math_Prep1_T1.pdf"],["math","English","Prepratory/Prepratory1/Term1/StudentBook/Math_EN_Prp1_T1.pdf"],["rel","إسلامية","Prepratory/Prepratory1/Term1/StudentBook/Islamic_Education_Prep1_T1.pdf"],["rel","مسيحية","Prepratory/Prepratory1/Term1/StudentBook/Christian_Education_Prep1_T1.pdf"],["sci","عربي","Prepratory/Prepratory1/Term1/StudentBook/Science_Prep1_T1.pdf"],["sci","English","Prepratory/Prepratory1/Term1/StudentBook/Science_EN_Prp1_TR1..pdf"],["sci","Français","Prepratory/Prepratory1/Term1/StudentBook/Science_FR_Prp1_TR1.pdf"],["soc","","Prepratory/Prepratory1/Term1/StudentBook/Social_Studies_Prep1_T1.pdf"],["comp","عربي","Prepratory/Prepratory1/Term1/StudentBook/ICT_ARABIC_Prp1_TR1.pdf"],["x","التربية المسرحية","Prepratory/Prepratory1/Term1/StudentBook/Thetar_prep1_Tr1.pdf"],["x","المكتبات ومهارات البحث","Prepratory/Prepratory1/Term1/StudentBook/Librarie_research_skills_prep1_Tr1.pdf"],["x","الإعلام التربوي","Prepratory/Prepratory1/Term1/StudentBook/Educational_media_Pep1_Tr1.pdf"],["x","مهارات الصناعة وريادة الأعمال","Prepratory/Prepratory1/Term1/StudentBook/Industry_Skills_prep1_t1.pdf"]],"prep2":[["ar","","Prepratory/Prepratory2/Term1/StudentBook/Arabic_language_prep2_t1.pdf"],["en","","Prepratory/Prepratory2/Term1/StudentBook/English_language_prep2_t1.pdf"],["l2","الإنجليزية","Prepratory/Prepratory2/Term1/StudentBook/English_sec_lang_prep2_t1.pdf"],["math","عربي","Prepratory/Prepratory2/Term1/StudentBook/Math_Ar_prep2_t1.pdf"],["math","English","Prepratory/Prepratory2/Term1/StudentBook/Math_EN_Prp2_T1.pdf"],["math","Français","Prepratory/Prepratory2/Term1/StudentBook/Math_FR_Prp2_T1.pdf"],["rel","إسلامية","Prepratory/Prepratory2/Term1/StudentBook/Islamic_religion_prep2_t1.pdf"],["rel","مسيحية","Prepratory/Prepratory2/Term1/StudentBook/Cristian_religion_prep2_t1.pdf"],["sci","عربي","Prepratory/Prepratory2/Term1/StudentBook/Science_Ar_prep2_t1.pdf"],["sci","English","Prepratory/Prepratory2/Term1/StudentBook/Science_EN_Pep2_T1.pdf"],["sci","Français","Prepratory/Prepratory2/Term1/StudentBook/Science_FR_Pep2_T1.pdf"],["soc","","Prepratory/Prepratory2/Term1/StudentBook/Social_studies_prep2_t1.pdf"],["comp","عربي","Prepratory/Prepratory2/Term1/StudentBook/ICT_ARABIC_Prp2_TR1.pdf"],["comp","English","Prepratory/Prepratory2/Term1/StudentBook/ICT_EN_Prp2_Tr1.pdf"],["x","مهارات الصناعة وريادة الأعمال","Prepratory/Prepratory2/Term1/StudentBook/Industry_Prep2_T1.pdf"],["x","مهارات الزراعة وريادة الأعمال","Prepratory/Prepratory2/Term1/StudentBook/Agriculture_2_Preparatory_TR1.pdf"],["x","المكتبات ومهارات البحث","Prepratory/Prepratory2/Term1/StudentBook/Libraries_2prep_tr1.pdf"],["l2","الإيطالية","Prepratory/Prepratory2/Term1/StudentBook/Italiano_prep2_t1.pdf"]],"prep3":[["ar","","Prepratory/Prepratory3/Term1/StudentBook/Arabic_language_prep3_t1.pdf"],["en","","Prepratory/Prepratory3/Term1/StudentBook/English_language_prep3_t1.pdf"],["l2","الإنجليزية","Prepratory/Prepratory3/Term1/StudentBook/English_sec_lang_prep3_t1.pdf"],["math","عربي","Prepratory/Prepratory3/Term1/StudentBook/Math_Ar_prep3_t1.pdf"],["math","English","Prepratory/Prepratory3/Term1/StudentBook/Math_EN_prep3_t1.pdf"],["math","Français","Prepratory/Prepratory3/Term1/StudentBook/Math_fr_prep3_t1.pdf"],["rel","إسلامية","Prepratory/Prepratory3/Term1/StudentBook/Islamic_religion_prep3_t1.pdf"],["rel","مسيحية","Prepratory/Prepratory3/Term1/StudentBook/Cristian_Prp3_Tr1.pdf"],["soc","","Prepratory/Prepratory3/Term1/StudentBook/Social_studies_prep3_t1.pdf"],["comp","عربي","Prepratory/Prepratory3/Term1/StudentBook/ICT_ARABIC_Prp3_TR1.pdf"],["sci","عربي","Prepratory/Prepratory3/Term1/StudentBook/Science_AR_Prp3_Tr1.pdf"],["sci","English","Prepratory/Prepratory3/Term1/StudentBook/Science_EN_Prp3_TR1.pdf"],["sci","Français","Prepratory/Prepratory3/Term1/StudentBook/Science_FR_Prp3_TR1.pdf"],["x","الإعلام التربوى","Prepratory/Prepratory3/Term1/StudentBook/Edu_media_prep3_t1.pdf"],["x","التربية المسرحية","Prepratory/Prepratory3/Term1/StudentBook/Theatre_Edu_prep3_t1.pdf"]],"prim1":[["ar","","Primary/Primary1/Term1/StudentBook/Arabic_language_prim1_t1.pdf"],["en","","Primary/Primary1/Term1/StudentBook/English_language_prim1_t1.pdf"],["math","عربي","Primary/Primary1/Term1/StudentBook/Math_Ar_prim1_t1.pdf"],["math","English","Primary/Primary1/Term1/StudentBook/Math_EN_P1_T1.pdf"],["math","Français","Primary/Primary1/Term1/StudentBook/Math_FR_P1_T1.pdf"],["rel","إسلامية","Primary/Primary1/Term1/StudentBook/Islamic_religion_prim1_t1.pdf"],["rel","مسيحية","Primary/Primary1/Term1/StudentBook/Cristian_religion_prim1_t1.pdf"]],"prim2":[["ar","","Primary/Primary2/Term1/StudentBook/Arabic_language_prim2_t1.pdf"],["en","","Primary/Primary2/Term1/StudentBook/English_language_prim2_t1.pdf"],["math","عربي","Primary/Primary2/Term1/StudentBook/Math_Ar_prim2_t1.pdf"],["math","English","Primary/Primary2/Term1/StudentBook/Math_EN_P2_T1.pdf"],["rel","إسلامية","Primary/Primary2/Term1/StudentBook/Islamic_religion_prim2_t1.pdf"],["rel","مسيحية","Primary/Primary2/Term1/StudentBook/Cristian_religion_prim2_t1.pdf"]],"prim3":[["ar","","Primary/Primary3/Term1/StudentBook/Arabic_language_prim3_t1.pdf"],["en","","Primary/Primary3/Term1/StudentBook/English_language_prim3_t1.pdf"],["math","عربي","Primary/Primary3/Term1/StudentBook/Math_Ar_prim3_t1.pdf"],["math","English","Primary/Primary3/Term1/StudentBook/Math_EN_P3_T1.pdf"],["math","Français","Primary/Primary3/Term1/StudentBook/Math_FR_P3_T1.pdf"],["rel","إسلامية","Primary/Primary3/Term1/StudentBook/Islamic_religion_prim3_t1.pdf"],["rel","مسيحية","Primary/Primary3/Term1/StudentBook/Cristian_religion_prim3_t1.pdf"]],"prim4":[["ar","","Primary/Primary4/Term1/StudentBook/Arabic_language_prim4_t1.pdf"],["en","","Primary/Primary4/Term1/StudentBook/English_language_prim4_t1.pdf"],["math","عربي","Primary/Primary4/Term1/StudentBook/Math_Ar_prim4_t1.pdf"],["math","English","Primary/Primary4/Term1/StudentBook/Math_EN_P4_T1.pdf"],["math","Français","Primary/Primary4/Term1/StudentBook/Math_FR_P4_T1.pdf"],["rel","إسلامية","Primary/Primary4/Term1/StudentBook/Islamic_religion_prim4_t1.pdf"],["rel","مسيحية","Primary/Primary4/Term1/StudentBook/Cristian_religion_prim4_t1.pdf"],["sci","عربي","Primary/Primary4/Term1/StudentBook/Science_Ar_prim4_t1.pdf"],["sci","English","Primary/Primary4/Term1/StudentBook/Science_EN_PRIM4_Tr1.pdf"],["sci","Français","Primary/Primary4/Term1/StudentBook/Science_FR_prim4_TR1.pdf"],["soc","","Primary/Primary4/Term1/StudentBook/Social_studies_prim4_t1.pdf"],["comp","عربي","Primary/Primary4/Term1/StudentBook/ICT_ARABIC_Prim4_TR1.pdf"],["x","مهارات إدارة الأسرة وريادة الأعمال","Primary/Primary4/Term1/StudentBook/Family_management_Prim4_TR1.pdf"],["x","مهارات الزراعة وريادة الأعمال","Primary/Primary4/Term1/StudentBook/Farming_skills_prim4_t1.pdf"],["x","المكتبات ومهارات البحث","Primary/Primary4/Term1/StudentBook/Libraries_prim4_t1.pdf"]],"prim5":[["ar","","Primary/Primary5/Term1/StudentBook/Arabic_langugae_prim5_t1.pdf"],["en","","Primary/Primary5/Term1/StudentBook/English_language_prim5_t1.pdf"],["math","عربي","Primary/Primary5/Term1/StudentBook/Math_Ar_prim5_t1.pdf"],["math","English","Primary/Primary5/Term1/StudentBook/Math_EN_prim5_t1.pdf"],["math","Français","Primary/Primary5/Term1/StudentBook/Math_FR_prim5_TR1.pdf"],["rel","إسلامية","Primary/Primary5/Term1/StudentBook/Islamic_prim5_tr1.pdf"],["rel","مسيحية","Primary/Primary5/Term1/StudentBook/Cristian_reliogion_prim5_t1.pdf"],["sci","عربي","Primary/Primary5/Term1/StudentBook/Science_Ar_prim5_t1.pdf"],["sci","Français","Primary/Primary5/Term1/StudentBook/Science_FR_prim5_TR1.pdf"],["soc","","Primary/Primary5/Term1/StudentBook/Social_studies_prim5_t1.pdf"],["comp","عربي","Primary/Primary5/Term1/StudentBook/ICT_ARABIC_Prim5_TR1.pdf"],["x","مهارات إدارة الأسرة وريادة الأعمال","Primary/Primary5/Term1/StudentBook/Family_management_Prim5_TR1.pdf"],["x","مهارات الزراعة وريادة الأعمال","Primary/Primary5/Term1/StudentBook/Farming_skills_prim5_t1.pdf"],["x","المكتبات ومهارات البحث","Primary/Primary5/Term1/StudentBook/Libraries_prim5_t1.pdf"]],"prim6":[["ar","","Primary/Primary6/Term1/StudentBook/Arabic_Primary6_T1.pdf"],["en","","Primary/Primary6/Term1/StudentBook/English_Primary6_T1.pdf"],["math","عربي","Primary/Primary6/Term1/StudentBook/Math_Primary6_T1.pdf"],["math","English","Primary/Primary6/Term1/StudentBook/Math_EN_P6_T1.pdf"],["math","Français","Primary/Primary6/Term1/StudentBook/Math_FR_P6_T1.pdf"],["rel","إسلامية","Primary/Primary6/Term1/StudentBook/Islamic_Education_Primary6_T1.pdf"],["rel","مسيحية","Primary/Primary6/Term1/StudentBook/Christian_Education_Primary6_T1.pdf"],["sci","عربي","Primary/Primary6/Term1/StudentBook/Science_Primary6_T1.pdf"],["sci","English","Primary/Primary6/Term1/StudentBook/Science_EN_prim6_TR1.pdf"],["sci","Français","Primary/Primary6/Term1/StudentBook/Science_FR_prim6_TR1.pdf"],["soc","","Primary/Primary6/Term1/StudentBook/Social_Studies_Primary6_T1.pdf"],["comp","عربي","Primary/Primary6/Term1/StudentBook/ICT_ARABIC_Prim6_TR1.pdf"],["x","مهارات إدارة الأسرة وريادة الأعمال","Primary/Primary6/Term1/StudentBook/Family_management_Prim6_TR1.pdf"],["x","مهارات الزراعة وريادة الأعمال","Primary/Primary6/Term1/StudentBook/Farming_skills_prim6_t1.pdf"],["x","المكتبات ومهارات البحث","Primary/Primary6/Term1/StudentBook/Libraries_prim6_t1.pdf"]],"sec1":[["ar","","Secondry/Secondry1/Term1/StudentBook/arabic_1sec_t1.pdf"],["ar","القصة","Secondry/Secondry1/Term1/StudentBook/Arabic_language_STORY_Sec1_Tr1.pdf"],["ar","القواعد","Secondry/Secondry1/Term1/StudentBook/naho_general_TR1_1sec.pdf"],["en","","Secondry/Secondry1/Term1/StudentBook/English_1sec_t1.pdf"],["l2","الإنجليزية","Secondry/Secondry1/Term1/StudentBook/English_second_language_secondary1.pdf"],["isci","عربي","Secondry/Secondry1/Term1/StudentBook/integratedscience_ARABIC_1_Secondary_TR1.pdf"],["isci","English","Secondry/Secondry1/Term1/StudentBook/integratedscience_EN_1_Secondary_TR1.pdf"],["isci","Français","Secondry/Secondry1/Term1/StudentBook/integratedscience_FR_1_Secondary_TR1.pdf"],["math","عربي","Secondry/Secondry1/Term1/StudentBook/Mathematics_AR_Tr1_Secondary.pdf"],["math","English","Secondry/Secondry1/Term1/StudentBook/Mathematics_EN_Tr1_Secondary.pdf"],["math","Français","Secondry/Secondry1/Term1/StudentBook/Mathematics_FR_Tr1_Secondary.pdf"],["hist","","Secondry/Secondry1/Term1/StudentBook/History_Sec1_Tr1.pdf"],["phil","","Secondry/Secondry1/Term1/StudentBook/Philosophy_and_Logic_Tr1_1sec.pdf"],["en","الفرنسية (لغة أولى)","Secondry/Secondry1/Term1/StudentBook/Premiere_langue_francaise_Sec1_Tr1.pdf.pdf"],["en","الفرنسية (لغة أولى) – كراسة التدريبات","Secondry/Secondry1/Term1/StudentBook/Premiere_langue_francaise_WB_Sec1_Tr1.pdf"],["en","الفرنسية (لغة أولى) – القصة","Secondry/Secondry1/Term1/StudentBook/Premiere_langue_francaise_STORY_Sec1_Tr1.pdf"],["l2","الفرنسية","Secondry/Secondry1/Term1/StudentBook/Une_deuxieme_langue_francaise_Sec1_Tr1.pdf"],["l2","الألمانية","Secondry/Secondry1/Term1/StudentBook/Deutschl_anguage_Sec1_Tr1.pdf"],["l2","الإيطالية","Secondry/Secondry1/Term1/StudentBook/Italiano_language_Sec1_Tr1.pdf"],["l2","الإسبانية","Secondry/Secondry1/Term1/StudentBook/Espanol_language_Sec1_Tr1.pdf"],["rel","إسلامية","Secondry/Secondry1/Term1/StudentBook/deen_islamy_1sec_t1_t2.pdf"],["rel","مسيحية","Secondry/Secondry1/Term1/StudentBook/Christian_1sec_t1.pdf"],["prog","عربي","Secondry/Secondry1/Term1/StudentBook/ICT_AR__Sec1_Tr1.pdf"],["comp","عربي","Secondry/Secondry1/Term1/StudentBook/ICT_AR__Sec1_Tr1.pdf"],["prog","English","Secondry/Secondry1/Term1/StudentBook/ICT_EN__Sec1_Tr1.pdf"],["comp","English","Secondry/Secondry1/Term1/StudentBook/ICT_EN__Sec1_Tr1.pdf"]],"sec2":[["ar","","Secondry/Secondry2/Term1/StudentBook/Arabic_language_Sec2_Tr1.pdf"],["ar","القصة","Secondry/Secondry2/Term1/StudentBook/Arabic_language_Story_Sec2_Tr1.pdf"],["en","","Secondry/Secondry2/Term1/StudentBook/English_language_2sec_t1.pdf"],["l2","الإنجليزية","Secondry/Secondry2/Term1/StudentBook/English_second_language_secondary2.pdf"],["en","الفرنسية (لغة أولى)","Secondry/Secondry2/Term1/StudentBook/Premiere_langue_francaise_SB_Sec2_Tr1-125.pdf"],["en","الفرنسية (لغة أولى) – كراسة التدريبات","Secondry/Secondry2/Term1/StudentBook/Premiere_langue_francaise_WB_Sec2_Tr1.pdf"],["en","الفرنسية (لغة أولى) – القصة","Secondry/Secondry2/Term1/StudentBook/Premiere_langue_francaise_STORY_Sec2_Tr1.pdf"],["l2","الفرنسية","Secondry/Secondry2/Term1/StudentBook/Une_deuxieme_langue_francaise_Sec2_Tr1.pdf"],["l2","الألمانية","Secondry/Secondry2/Term1/StudentBook/Deutsch_language_Sec2_Tr1.pdf"],["l2","الإيطالية","Secondry/Secondry2/Term1/StudentBook/Italiano_language_Sec2_Tr1.pdf"],["l2","الإسبانية","Secondry/Secondry2/Term1/StudentBook/Espanol_language_Sec2_Tr1.pdf"],["rel","إسلامية","Secondry/Secondry2/Term1/StudentBook/Islamic_religion_Sec2_Tr1.pdf"],["rel","مسيحية","Secondry/Secondry2/Term1/StudentBook/Christian_religion_Sec2_Tr1.pdf"],["chem","عربي","Secondry/Secondry2/Term1/StudentBook/Chemistry_Arabic_2_Secondary_TR1.pdf"],["chem","English","Secondry/Secondry2/Term1/StudentBook/chemistry_English_Sec2_TR1.pdf"],["chem","Français","Secondry/Secondry2/Term1/StudentBook/chemistry_FR_Sec2_TR1.pdf"],["phys","عربي","Secondry/Secondry2/Term1/StudentBook/Physics_Arabic_2_Secondary_TR1.pdf"],["phys","English","Secondry/Secondry2/Term1/StudentBook/Physics_EN_Secondary2_TR1.pdf"],["phys","Français","Secondry/Secondry2/Term1/StudentBook/Physics_F_Secondary2_TR1.pdf"],["hist","","Secondry/Secondry2/Term1/StudentBook/History_Sec2_Tr1.pdf"],["geo","","Secondry/Secondry2/Term1/StudentBook/Geography_Sec2_Tr1.pdf"],["psy","","Secondry/Secondry2/Term1/StudentBook/Psychologyand_sociology_Sec2_Tr1.pdf"],["comp","عربي","Secondry/Secondry2/Term1/StudentBook/ICT_AR_SEC2_Tr1.pdf"],["comp","English","Secondry/Secondry2/Term1/StudentBook/ICT_En_SEC2_Tr1.pdf"],["alg","عربي","Secondry/Secondry2/Term1/StudentBook/pure_Mathematics_ARABIC_Sec2_Tr1.pdf"],["calc","عربي","Secondry/Secondry2/Term1/StudentBook/pure_Mathematics_ARABIC_Sec2_Tr1.pdf"],["alg","English","Secondry/Secondry2/Term1/StudentBook/pure_Mathematics_ENGLISH_Sec2_Tr1.pdf"],["calc","English","Secondry/Secondry2/Term1/StudentBook/pure_Mathematics_ENGLISH_Sec2_Tr1.pdf"],["alg","Français","Secondry/Secondry2/Term1/StudentBook/pure_Mathematics_FR_Sec2_Tr1.pdf"],["calc","Français","Secondry/Secondry2/Term1/StudentBook/pure_Mathematics_FR_Sec2_Tr1.pdf"],["math","عربي","Secondry/Secondry2/Term1/StudentBook/General_Mathematics_ARABIC_Sec2_Tr1.pdf"],["math","English","Secondry/Secondry2/Term1/StudentBook/General_Mathematics_ENGLISH_Sec2_Tr1.pdf"],["stc","عربي","Secondry/Secondry2/Term1/StudentBook/Application_Mathematics_AR_Sec2_Tr1.pdf"],["dyn","عربي","Secondry/Secondry2/Term1/StudentBook/Application_Mathematics_AR_Sec2_Tr1.pdf"],["stc","English","Secondry/Secondry2/Term1/StudentBook/Application_Mathematics_EN_Sec2_Tr1.pdf"],["dyn","English","Secondry/Secondry2/Term1/StudentBook/Application_Mathematics_EN_Sec2_Tr1.pdf"],["stc","Français","Secondry/Secondry2/Term1/StudentBook/Application_des_Mathematiques_FR_Sec2_Tr1.pdf"],["dyn","Français","Secondry/Secondry2/Term1/StudentBook/Application_des_Mathematiques_FR_Sec2_Tr1.pdf"],["x","المواطنة وحقوق الإنسان","Secondry/Secondry2/Term1/StudentBook/Citizenship_and_Human_Rights_Sec2_Tr1.pdf"]],"sec3":[["ar","","Secondry/Secondry3/Term1/StudentBook/Arabic_language_Sec3.pdf"],["ar","القصة","Secondry/Secondry3/Term1/StudentBook/Arabic_language_Story_Sec3.pdf"],["ar","القواعد","Secondry/Secondry3/Term1/StudentBook/Arabic_language_NAHO_Sec3.pdf"],["en","","Secondry/Secondry3/Term1/StudentBook/English_language_Sec3_tr1.pdf"],["l2","الإنجليزية","Secondry/Secondry3/Term1/StudentBook/English_Second_Language_SEC3_Tr1.pdf"],["en","الفرنسية (لغة أولى)","Secondry/Secondry3/Term1/StudentBook/Premiere_langue_francaise_SB_Sec3.pdf"],["en","الفرنسية (لغة أولى) – كراسة التدريبات","Secondry/Secondry3/Term1/StudentBook/Premiere_langue_francaise_WB_Sec3.pdf"],["en","الفرنسية (لغة أولى) – القصة","Secondry/Secondry3/Term1/StudentBook/Premiere_langue_francaise_Story_Sec3.pdf"],["l2","الفرنسية","Secondry/Secondry3/Term1/StudentBook/Une_deuxieme_langue_francaise_Sec3.pdf"],["l2","الألمانية","Secondry/Secondry3/Term1/StudentBook/Deutsch_language_Sec3.pdf"],["l2","الإيطالية","Secondry/Secondry3/Term1/StudentBook/Italiano_language_Sec3.pdf"],["l2","الإسبانية","Secondry/Secondry3/Term1/StudentBook/Espanol_language_Sec3.pdf"],["rel","إسلامية","Secondry/Secondry3/Term1/StudentBook/Islamic_religion_Sec3.pdf"],["rel","مسيحية","Secondry/Secondry3/Term1/StudentBook/Christian_religion_Sec3.pdf"],["chem","عربي","Secondry/Secondry3/Term1/StudentBook/Chemistry_Arabic_Sec3.pdf"],["chem","English","Secondry/Secondry3/Term1/StudentBook/Chemistry_English_Sec3.pdf"],["chem","Français","Secondry/Secondry3/Term1/StudentBook/Chemistry_FR_Sec3.pdf"],["phys","عربي","Secondry/Secondry3/Term1/StudentBook/Physics_Arabic_Sec3.pdf"],["phys","English","Secondry/Secondry3/Term1/StudentBook/Physics_English_Sec3.pdf"],["phys","Français","Secondry/Secondry3/Term1/StudentBook/Physics_French_Sec3.pdf"],["bio","عربي","Secondry/Secondry3/Term1/StudentBook/Biology_ARABIC_Sec3.pdf"],["bio","English","Secondry/Secondry3/Term1/StudentBook/Biology_English_Sec3.pdf"],["bio","Français","Secondry/Secondry3/Term1/StudentBook/Biology_FR_Sec3.pdf"],["hist","","Secondry/Secondry3/Term1/StudentBook/History_Sec3.pdf"],["geo","","Secondry/Secondry3/Term1/StudentBook/Geography_Sec3.pdf"],["comp","عربي","Secondry/Secondry3/Term1/StudentBook/ICT_AR_Sec3.pdf"],["comp","English","Secondry/Secondry3/Term1/StudentBook/ICT_EN_Sec3.pdf"],["x","التربية الوطنية","Secondry/Secondry3/Term1/StudentBook/National_Education_Sec3_tr1.pdf"],["psy","","Secondry/Secondry3/Term1/StudentBook/Psychology_Sociology_Sec3.pdf"],["alg","عربي","Secondry/Secondry3/Term1/StudentBook/pure_Mathematics_ARABIC_Sec3.pdf"],["calc","عربي","Secondry/Secondry3/Term1/StudentBook/pure_Mathematics_ARABIC_Sec3.pdf"],["alg","English","Secondry/Secondry3/Term1/StudentBook/pure_Mathematics_ENGLISH_Sec3.pdf"],["calc","English","Secondry/Secondry3/Term1/StudentBook/pure_Mathematics_ENGLISH_Sec3.pdf"],["alg","Français","Secondry/Secondry3/Term1/StudentBook/pure_Mathematics_FRENCH_Sec3.pdf"],["calc","Français","Secondry/Secondry3/Term1/StudentBook/pure_Mathematics_FRENCH_Sec3.pdf"],["stc","عربي","Secondry/Secondry3/Term1/StudentBook/applied_Mathematics_ARABIC_Sec3.pdf"],["dyn","عربي","Secondry/Secondry3/Term1/StudentBook/applied_Mathematics_ARABIC_Sec3.pdf"],["stc","English","Secondry/Secondry3/Term1/StudentBook/applied_Mathematics_ENGLISH_Sec3.pdf"],["dyn","English","Secondry/Secondry3/Term1/StudentBook/applied_Mathematics_ENGLISH_Sec3.pdf"],["stc","Français","Secondry/Secondry3/Term1/StudentBook/applied_Mathematics_FRENCH_Sec3.pdf"],["dyn","Français","Secondry/Secondry3/Term1/StudentBook/applied_Mathematics_FRENCH_Sec3.pdf"],["stat","عربي","Secondry/Secondry3/Term1/StudentBook/Statistics_Arabic_Sec3.pdf"],["stat","English","Secondry/Secondry3/Term1/StudentBook/Statistics_English_Sec3.pdf"],["stat","Français","Secondry/Secondry3/Term1/StudentBook/Statistics_Fr_Sec3.pdf"]]};
+
 /* ========== اختيار المرحلة، الترحيب، الكتب ========== */
 const WIS={
   m:['ابدأ بأصغر خطوة ممكنة؛ الدماغ يتحمّس بعد أن يبدأ لا قبل أن يبدأ.','لا تقارن بدايتك بنهاية غيرك. قارن نفسك بنفسك أمس.','ما تفعله أول النهار يحدد شعورك بقية اليوم، فاجعله شيئاً تفخر به.','الثقة لا تأتي قبل الإنجاز، بل تتكوّن بعد كل مهمة صغيرة تنهيها.','أخطاؤك ليست حكماً عليك، هي معلومات تخبرك ماذا تُصلح.','تنفّس بعمق، رتّب أولوية واحدة، ثم ابدأ بها.','الاستمرارية الهادئة أقوى من الحماس المتقطع.','أنت أقدر مما تظن، وأقوى مما شعرت به في أصعب يوم مرّ عليك.','التعب مؤقت، أما أثر المجهود فيبقى.','اختر اليوم أن تكون أفضل قليلاً، لا أن تكون مثالياً.','حين يصعب الأمر قسّمه؛ الجبل يُصعد خطوة خطوة.','ابتسم لنفسك قبل أن تفتح الكتاب، فالمعاملة الطيبة تحسّن الأداء.'],
@@ -2204,14 +2223,25 @@ function showWelcome(){
 
 /* ----- الكتب ----- */
 const bookKey=s=>s.k+'|'+eduLabel();
+function bkLinks(s){
+  const e=eduOf();if(!e||typeof BKCAT==='undefined')return [];
+  return (BKCAT[e.stage+e.grade]||[]).filter(x=>x[0]===s.k);
+}
+function bkBtn(x){return '<a class="btn s" href="'+BK_BASE+x[2].split('/').map(encodeURIComponent).join('/')+'" target="_blank" rel="noopener">PDF'+(x[1]?' · '+esc(x[1]):'')+'</a>'}
 function booksCard(){
   const e=eduOf();if(!e)return '';
+  const cat=(typeof BKCAT!=='undefined'&&BKCAT[e.stage+e.grade])||[];
   const rows=mySubs().map(s=>{
-    const f=libItems.find(x=>x.bk===bookKey(s));
-    return '<li style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 0"><i style="width:10px;height:10px;border-radius:50%;background:'+s.c+'"></i><span class="t" style="flex:1;min-width:140px">'+esc(bookTitle(s))+'</span>'+
-    (f?'<button class="btn s" data-a="libopen" data-id="'+f.id+'">فتح</button>':'<a class="btn g s" href="'+bookSearch(s)+'" target="_blank" rel="noopener">بحث</a>')+
+    const f=libItems.find(x=>x.bk===bookKey(s)),L=bkLinks(s);
+    return '<li style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 0"><i style="width:10px;height:10px;border-radius:50%;background:'+s.c+'"></i><span class="t" style="flex:1;min-width:140px">'+esc(bookTitle(s))+'</span>'+
+    (f?'<button class="btn s" data-a="libopen" data-id="'+f.id+'">فتح المحفوظ</button>':'')+
+    L.map(bkBtn).join('')+
+    (!f&&!L.length?'<a class="btn g s" href="'+bookSearch(s)+'" target="_blank" rel="noopener">بحث</a>':'')+
     '<label class="btn g s">'+(f?'استبدال':'رفع')+'<input type="file" accept="application/pdf,.pdf" hidden data-c="bookup" data-k="'+s.k+'"></label></li>'}).join('');
-  return '<div class="card" style="margin-bottom:12px"><h3>كتب مرحلتي</h3><p class="mut sm">'+esc(eduLabel())+'. «بحث» يفتح نتائج عن كتاب الوزارة الرسمي، وبعد تنزيله ارفعه هنا ليبقى معك بلا إنترنت. الكتب على جهازك فقط.</p><ul class="list">'+rows+'</ul><div class="row" style="margin-top:8px"><a class="btn g s" href="https://moe.gov.eg" target="_blank" rel="noopener">موقع الوزارة</a><a class="btn g s" href="https://study.ekb.eg" target="_blank" rel="noopener">بنك المعرفة المصري</a></div></div>';
+  const ex=cat.filter(x=>x[0]==='x');
+  const exh=ex.length?'<h4 style="margin:12px 0 4px">كتب أخرى في مرحلتك</h4><ul class="list">'+ex.map(x=>'<li style="display:flex;align-items:center;gap:8px;padding:6px 0"><span class="t" style="flex:1">'+esc(x[1])+'</span><a class="btn s" href="'+BK_BASE+x[2].split('/').map(encodeURIComponent).join('/')+'" target="_blank" rel="noopener">PDF</a></li>').join('')+'</ul>':'';
+  const note=cat.length?'أزرار «PDF» تفتح كتاب الوزارة الرسمي (الفصل الأول 2026-2027) من المكتبة الإلكترونية لوزارة التربية والتعليم. المواد بلا زر PDF غير منشورة بكتاب في المكتبة حالياً (مثل الفنية والموسيقى والرياضة)، فاستخدم «بحث» أو ارفع كتابك.':'كتب هذه المرحلة غير منشورة بعد في المكتبة الإلكترونية للوزارة. استخدم «بحث» أو ارفع كتابك.';
+  return '<div class="card" style="margin-bottom:12px"><h3>كتب مرحلتي</h3><p class="mut sm">'+esc(eduLabel())+'. '+note+' يمكنك رفع نسخة لتبقى معك بلا إنترنت (على جهازك فقط).</p><ul class="list">'+rows+'</ul>'+exh+'<div class="row" style="margin-top:8px"><a class="btn g s" href="'+BK_LIB+'" target="_blank" rel="noopener">المكتبة الإلكترونية للوزارة</a><a class="btn g s" href="https://moe.gov.eg" target="_blank" rel="noopener">موقع الوزارة</a><a class="btn g s" href="https://study.ekb.eg" target="_blank" rel="noopener">بنك المعرفة المصري</a></div></div>';
 }
 CHG.bookup=async t=>{
   const f=t.files[0];if(!f)return;const s=mySubs().find(x=>x.k===t.dataset.k);if(!s)return;
@@ -2222,6 +2252,273 @@ CHG.bookup=async t=>{
   }catch(err){toast('تعذر حفظ الكتاب')}
   t.value='';
 };
+
+/* بنك أسئلة تدريبية من إعداد التطبيق (ليست امتحانات الوزارة).
+   الشكل: [المادة، المستوى، السؤال، [الخيارات]، رقم الصحيحة، الشرح]
+   المستويات: p13 ابتدائي 1-3 · p46 ابتدائي 4-6 · prep إعدادي · sec ثانوي وبكالوريا */
+const BANK0=[
+['math','p13','ما ناتج 5 + 3؟',['7','8','9','6'],1,'5 + 3 = 8'],
+['math','p13','ما ناتج 10 − 4؟',['5','6','7','4'],1,'10 − 4 = 6'],
+['math','p13','ما ناتج 2 × 3؟',['5','6','8','9'],1,'2 × 3 = 6 (اثنان ثلاث مرات)'],
+['math','p13','ما العدد الذي يأتي بعد 9؟',['8','10','11','7'],1,'بعد 9 يأتي 10'],
+['ar','p13','كم عدد حروف كلمة «قمر»؟',['2','3','4','5'],1,'ق - م - ر = ثلاثة حروف'],
+['ar','p13','ضد كلمة «كبير»:',['طويل','صغير','سريع','جميل'],1,'ضد كبير هو صغير'],
+['en','p13','What colour is the sun?',['Blue','Yellow','Green','Black'],1,'The sun looks yellow.'],
+['en','p13','Choose the animal:',['Table','Cat','Book','Door'],1,'Cat is an animal.'],
+
+['math','p46','345 + 278 = ؟',['623','613','523','633'],0,'345 + 278 = 623'],
+['math','p46','12 × 8 = ؟',['86','96','106','88'],1,'12 × 8 = 96'],
+['math','p46','أي كسر يساوي ½؟',['2/6','3/6','2/5','4/6'],1,'3/6 = 1/2 بقسمة البسط والمقام على 3'],
+['math','p46','محيط مستطيل طوله 9 سم وعرضه 4 سم:',['26 سم','36 سم','13 سم','18 سم'],0,'المحيط = 2 × (9 + 4) = 26 سم'],
+['math','p46','مساحة مربع طول ضلعه 7 سم:',['14 سم²','28 سم²','49 سم²','21 سم²'],2,'المساحة = 7 × 7 = 49'],
+['math','p46','0.5 + 0.25 = ؟',['0.75','0.30','0.55','0.70'],0,'0.50 + 0.25 = 0.75'],
+['math','p46','144 ÷ 12 = ؟',['10','11','12','14'],2,'12 × 12 = 144'],
+['math','p46','25% من 80 تساوي:',['20','25','15','40'],0,'80 ÷ 4 = 20'],
+['math','p46','أي الأعداد التالية أولي؟',['9','15','17','21'],2,'17 لا يقبل القسمة إلا على 1 ونفسه'],
+['math','p46','½ + ¼ = ؟',['3/4','2/6','1/6','3/8'],0,'2/4 + 1/4 = 3/4'],
+['ar','p46','الفاعل في «كتب الطالبُ الدرس»:',['كتب','الطالبُ','الدرسَ','لا يوجد'],1,'الفاعل من قام بالفعل وهو مرفوع: الطالبُ'],
+['ar','p46','جمع كلمة «كتاب»:',['كتب','كاتبون','كتابات','أكتاب'],0,'جمع التكسير: كتب'],
+['ar','p46','ضد كلمة «سعيد»:',['فرحان','حزين','مسرور','ضاحك'],1,'ضد السعيد هو الحزين'],
+['ar','p46','الفعل في «يلعبُ الولدُ في الحديقة»:',['الولد','يلعبُ','الحديقة','في'],1,'الفعل كلمة تدل على حدث: يلعب'],
+['ar','p46','مثنى كلمة «قلم» في حالة الرفع:',['قلمان','أقلام','قلمات','قلمون'],0,'المثنى يُرفع بالألف: قلمان'],
+['ar','p46','جمع المذكر السالم يُنصب بـ:',['الضمة','الياء','الفتحة','الواو'],1,'يُرفع بالواو ويُنصب ويُجر بالياء'],
+['ar','p46','مرادف كلمة «الجميل»:',['القبيح','الحسن','الطويل','الصغير'],1,'الحسن والجميل بمعنى واحد'],
+['en','p46','She ___ to school every day.',['go','goes','going','gone'],1,'Third person singular in present simple takes -es: goes.'],
+['en','p46','The plural of "child" is:',['childs','children','childes','childrens'],1,'Irregular plural: children.'],
+['en','p46','The opposite of "hot" is:',['cold','warm','big','small'],0,'Hot ≠ cold.'],
+['en','p46','I ___ a book now.',['read','am reading','reads','have read'],1,'"Now" needs present continuous: am reading.'],
+['en','p46','Yesterday I ___ football.',['play','plays','played','playing'],2,'Past simple: played.'],
+['en','p46','Which one is a fruit?',['carrot','apple','potato','onion'],1,'An apple is a fruit.'],
+['en','p46','There ___ three books on the desk.',['is','are','am','be'],1,'Plural noun needs "are".'],
+['en','p46','Choose the correct sentence:',['He have a car','He has a car','He haves a car','He having a car'],1,'He/She/It takes "has".'],
+['sci','p46','أقرب كوكب إلى الشمس:',['الأرض','عطارد','المريخ','الزهرة'],1,'عطارد هو الأقرب إلى الشمس'],
+['sci','p46','الغاز الذي نتنفسه ويلزم للحياة:',['النيتروجين','الأكسجين','ثاني أكسيد الكربون','الهيدروجين'],1,'نستخدم الأكسجين في التنفس'],
+['sci','p46','حالات المادة الشائعة هي:',['حالتان','ثلاث حالات','أربع حالات','خمس حالات'],1,'صلبة وسائلة وغازية'],
+['sci','p46','تحدث عملية البناء الضوئي في:',['الجذور','الأوراق الخضراء','الأزهار','الساق فقط'],1,'الكلوروفيل في الأوراق الخضراء'],
+['sci','p46','أكبر كواكب المجموعة الشمسية:',['زحل','المشتري','أورانوس','نبتون'],1,'المشتري هو الأكبر'],
+['sci','p46','درجة غليان الماء النقي عند مستوى سطح البحر:',['0°س','50°س','100°س','150°س'],2,'يغلي الماء عند 100°س'],
+['sci','p46','يتكون الماء من:',['أكسجين وهيدروجين','كربون وأكسجين','نيتروجين وهيدروجين','كربون وهيدروجين'],0,'H₂O'],
+['sci','p46','العضو الذي يضخ الدم في الجسم:',['الرئة','القلب','الكبد','الكلية'],1,'القلب يضخ الدم'],
+
+['math','prep','حل المعادلة 3س + 5 = 20:',['س = 3','س = 5','س = 15','س = 25/3'],1,'3س = 15 ثم س = 5'],
+['math','prep','(−3) × (−4) = ؟',['−12','12','−7','7'],1,'حاصل ضرب سالبين موجب'],
+['math','prep','مجموع قياسات زوايا المثلث:',['90°','180°','270°','360°'],1,'مجموع زوايا أي مثلث 180°'],
+['math','prep','الجذر التربيعي للعدد 81:',['7','8','9','10'],2,'9 × 9 = 81'],
+['math','prep','ميل المستقيم المار بالنقطتين (0،0) و(2،4):',['1/2','2','4','8'],1,'الميل = 4 ÷ 2 = 2'],
+['math','prep','(س + 2)² = ؟',['س² + 4','س² + 2س + 4','س² + 4س + 4','س² + 4س + 2'],2,'(أ+ب)² = أ² + 2أب + ب²'],
+['math','prep','2³ × 2² = ؟',['2⁵','2⁶','4⁵','2¹'],0,'نجمع الأسس عند ضرب أساس واحد'],
+['math','prep','مساحة دائرة نصف قطرها 7 سم (π = 22/7):',['44 سم²','154 سم²','22 سم²','308 سم²'],1,'π × 7² = 22/7 × 49 = 154'],
+['math','prep','حل المعادلة س² − 9 = 0:',['س = 3 فقط','س = ±3','س = 9','س = ±9'],1,'س² = 9 إذن س = 3 أو −3'],
+['math','prep','الوسط الحسابي للأعداد 2، 4، 6، 8:',['4','5','6','20'],1,'(2+4+6+8) ÷ 4 = 5'],
+['math','prep','مثلث قائم الزاوية ضلعاه 3 و4، فالوتر يساوي:',['5','6','7','12'],0,'3² + 4² = 25 ومنه الوتر = 5'],
+['ar','prep','«إنّ العلمَ نورٌ»، كلمة «العلمَ» تعرب:',['مبتدأ مرفوع','اسم إنّ منصوب','خبر إنّ مرفوع','فاعل'],1,'إنّ تنصب المبتدأ ويسمى اسمها'],
+['ar','prep','المفعول به في «قرأ الطالبُ الكتابَ»:',['الطالبُ','الكتابَ','قرأ','لا يوجد'],1,'المفعول به منصوب: الكتابَ'],
+['ar','prep','جمع كلمة «قلم»:',['أقلام','قلمات','أقلمة','قلوم'],0,'جمع تكسير: أقلام'],
+['ar','prep','«الذي» نوعها:',['اسم موصول','ضمير','اسم إشارة','حرف جر'],0,'من الأسماء الموصولة'],
+['ar','prep','الفعل المضارع المجزوم:',['لم يكتبْ','يكتبُ','سيكتبُ','كتبَ'],0,'لم تجزم المضارع'],
+['ar','prep','أي جملة فيها أسلوب شرط؟',['إن تذاكرْ تنجحْ','ما أجمل السماء','هل ذاكرت','لا تهملْ'],0,'إن أداة شرط جازمة'],
+['ar','prep','يُرفع المثنى بـ:',['الألف','الياء','الضمة','الواو'],0,'المثنى يُرفع بالألف'],
+['ar','prep','أي جملة فيها تعجب؟',['ما أجملَ الربيعَ!','هل الربيعُ جميل؟','الربيعُ جميلٌ','لا تكرهِ الربيعَ'],0,'صيغة ما أفعله'],
+['ar','prep','تكتب الهمزة في كلمة «مسؤول» على:',['واو','ياء','ألف','السطر'],0,'لأن الضمة أقوى الحركات'],
+['en','prep','If it rains, we ___ at home.',['stay','will stay','stayed','would stay'],1,'First conditional: if + present, will + verb.'],
+['en','prep','The book ___ by the teacher yesterday.',['wrote','was written','is written','writes'],1,'Past passive: was/were + past participle.'],
+['en','prep','She is ___ than her sister.',['tall','taller','tallest','more tall'],1,'Comparative of short adjective: taller.'],
+['en','prep','I have lived here ___ 2015.',['for','since','in','during'],1,'"Since" is used with a starting point.'],
+['en','prep','He said, "I am happy." → He said that he ___ happy.',['is','was','will be','has been'],1,'Reported speech shifts present to past.'],
+['en','prep','Which word is a noun?',['quickly','happiness','beautiful','run'],1,'Happiness names a feeling.'],
+['en','prep','He ___ TV when I called.',['watches','watched','was watching','has watched'],2,'Past continuous for an action in progress.'],
+['en','prep','Choose the correct sentence:',['She don\'t like tea','She doesn\'t like tea','She not like tea','She doesn\'t likes tea'],1,'doesn\'t + base verb.'],
+['sci','prep','الرمز الكيميائي للصوديوم:',['S','So','Na','N'],2,'Na من اللاتينية Natrium'],
+['sci','prep','وحدة قياس القوة:',['الجول','النيوتن','الواط','الباسكال'],1,'القوة تقاس بالنيوتن'],
+['sci','prep','العُضيّة المسؤولة عن إنتاج الطاقة في الخلية:',['النواة','الميتوكوندريا','الريبوسوم','الفجوة'],1,'الميتوكوندريا محطة الطاقة'],
+['sci','prep','السرعة = المسافة ÷ ؟',['الزمن','الكتلة','القوة','الحجم'],0,'السرعة = المسافة ÷ الزمن'],
+['sci','prep','العدد الذري للهيدروجين:',['1','2','3','4'],0,'ذرة الهيدروجين فيها بروتون واحد'],
+['sci','prep','ما يوجد في الخلية النباتية فقط:',['جدار خلوي','نواة','غشاء بلازمي','سيتوبلازم'],0,'الجدار الخلوي من السليلوز'],
+['sci','prep','تحول المادة من الحالة الصلبة إلى السائلة:',['تبخر','انصهار','تكاثف','تجمد'],1,'الانصهار'],
+['sci','prep','القوة = ؟',['الكتلة × التسارع','الكتلة ÷ التسارع','السرعة × الزمن','الشغل ÷ المسافة'],0,'القانون الثاني لنيوتن F = m × a'],
+['sci','prep','الرقم الهيدروجيني للمحلول المتعادل:',['0','7','14','1'],1,'pH = 7'],
+
+['math','sec','مشتقة الدالة س³:',['س²','3س²','3س','س⁴/4'],1,'د/دس (سⁿ) = ن·سⁿ⁻¹'],
+['math','sec','∫ 2س دس = ؟',['س² + ث','2س² + ث','س + ث','2 + ث'],0,'تكامل 2س هو س² + ثابت'],
+['math','sec','نهـا (س→0) جا س / س = ؟',['0','1','∞','−1'],1,'نهاية أساسية تساوي 1'],
+['math','sec','مشتقة جا س:',['جتا س','−جتا س','−جا س','ظا س'],0,'د(جا س)/دس = جتا س'],
+['math','sec','حل المعادلة س² − 5س + 6 = 0:',['س = 2 أو 3','س = 1 أو 6','س = −2 أو −3','س = 5 أو 6'],0,'(س−2)(س−3) = 0'],
+['math','sec','لو₂ 8 = ؟',['2','3','4','8'],1,'2³ = 8'],
+['math','sec','مشتقة الدالة الأسية eˢ:',['س eˢ⁻¹','eˢ','e','لو س'],1,'الدالة الأسية مشتقتها نفسها'],
+['math','sec','مجموع 1 + 2 + ... + 10:',['45','50','55','100'],2,'ن(ن+1)/2 = 10×11/2 = 55'],
+['math','sec','مشتقة لو س (اللوغاريتم الطبيعي):',['1/س','س','لو س ÷ س','eˢ'],0,'د(لو س)/دس = 1/س'],
+['math','sec','∫ من 0 إلى 1 س دس = ؟',['1','1/2','2','0'],1,'[س²/2] من 0 إلى 1 = 1/2'],
+['math','sec','قيمة ت² حيث ت = √−1:',['1','−1','ت','−ت'],1,'ت² = −1 بالتعريف'],
+['ar','sec','«لا» النافية للجنس تعمل عمل:',['إنّ','كان','ظنّ','ما'],0,'تنصب الاسم وترفع الخبر مثل إنّ'],
+['ar','sec','نائب الفاعل في «فُتحَ البابُ»:',['فُتحَ','البابُ','لا يوجد','محذوف'],1,'الفعل مبني للمجهول والباب نائب فاعل'],
+['ar','sec','الحال في «جاء الطالبُ مسرعاً»:',['مسرعاً','الطالبُ','جاء','لا يوجد'],0,'الحال يبين هيئة صاحبها'],
+['ar','sec','التمييز في «اشتريتُ عشرين كتاباً»:',['عشرين','كتاباً','اشتريتُ','لا يوجد'],1,'التمييز يزيل إبهام العدد'],
+['ar','sec','بحر الشعر الذي تفعيلته «فعولن مفاعيلن فعولن مفاعلن»:',['الطويل','الكامل','الرجز','الرمل'],0,'تفعيلات البحر الطويل'],
+['ar','sec','إعراب «محمدُ» في «يا محمدُ»:',['منادى مبني على الضم في محل نصب','فاعل','مبتدأ','مفعول به'],0,'المنادى العلم المفرد يبنى على الضم'],
+['ar','sec','أسلوب القصر في «ما العلمُ إلا نورٌ»:',['قصر بما وإلا','استفهام','شرط','نداء'],0,'النفي والاستثناء من طرق القصر'],
+['ar','sec','«زيداً» في «حضر الطلابُ إلا زيداً»:',['مستثنى منصوب','فاعل','مبتدأ','خبر'],0,'المستثنى بعد إلا في كلام تام منصوب'],
+['en','sec','If I ___ rich, I would travel the world.',['am','were','will be','have been'],1,'Second conditional: if + past (were), would + verb.'],
+['en','sec','By next year, he ___ his studies.',['finishes','will have finished','finished','has finished'],1,'Future perfect with "by next year".'],
+['en','sec','The man ___ lives next door is a doctor.',['who','which','whom','whose'],0,'"Who" refers to a person as subject.'],
+['en','sec','Hardly ___ the room when the phone rang.',['he entered','had he entered','he had entered','did he entered'],1,'Inversion after "hardly" with past perfect.'],
+['en','sec','She suggested ___ to the cinema.',['to go','going','go','went'],1,'"Suggest" is followed by a gerund.'],
+['en','sec','Synonym of "rapid":',['slow','quick','weak','late'],1,'Rapid means quick.'],
+['en','sec','He is used to ___ early.',['wake up','waking up','woke up','wakes up'],1,'be used to + gerund.'],
+['en','sec','Neither Ali nor his friends ___ here.',['is','are','was','be'],1,'Verb agrees with the nearer subject (friends).'],
+['phys','sec','وحدة الشغل في النظام الدولي:',['نيوتن','جول','واط','باسكال'],1,'الشغل يقاس بالجول'],
+['phys','sec','قانون أوم:',['ج = ت × م','ج = ت ÷ م','ج = م ÷ ت','ج = ت + م'],0,'فرق الجهد = شدة التيار × المقاومة'],
+['phys','sec','سرعة الضوء في الفراغ تقريباً:',['3×10⁸ م/ث','3×10⁶ م/ث','3×10⁵ م/ث','3×10¹⁰ م/ث'],0,'حوالي 300 مليون م/ث'],
+['phys','sec','القوة المحصلة تساوي:',['الكتلة × العجلة','الكتلة ÷ العجلة','العجلة ÷ الكتلة','الكتلة + العجلة'],0,'القانون الثاني لنيوتن'],
+['phys','sec','وحدة المقاومة الكهربية:',['الفولت','الأوم','الأمبير','الواط'],1,'المقاومة تقاس بالأوم'],
+['phys','sec','طاقة الحركة =',['½ ك ع²','ك ع','ك جـ ف','½ ك ع'],0,'ط = ½ ك ع²'],
+['phys','sec','التردد لموجة زمنها الدوري 0.01 ث:',['10 هرتز','100 هرتز','0.01 هرتز','1 هرتز'],1,'التردد = 1 ÷ الزمن الدوري = 100'],
+['phys','sec','تتناسب شدة التيار طردياً مع:',['فرق الجهد (عند ثبوت المقاومة)','المقاومة','الطول','الزمن'],0,'ت = جـ ÷ م'],
+['chem','sec','الصيغة الكيميائية لحمض الهيدروكلوريك:',['HCl','HNO₃','H₂SO₄','NaCl'],0,'HCl'],
+['chem','sec','الأحماض رقمها الهيدروجيني:',['أقل من 7','7','أكبر من 7','14'],0,'كلما قل الرقم زادت الحموضة'],
+['chem','sec','عدد أفوجادرو تقريباً:',['6.02×10²³','3×10⁸','9.8','1.6×10⁻¹⁹'],0,'عدد الجسيمات في المول'],
+['chem','sec','الرابطة بين Na وCl في ملح الطعام:',['أيونية','تساهمية','فلزية','هيدروجينية'],0,'انتقال إلكترون من الصوديوم إلى الكلور'],
+['chem','sec','أنشط الهالوجينات:',['الفلور','اليود','البروم','الكلور'],0,'النشاط يقل بالنزول في المجموعة'],
+['chem','sec','الكتلة المولية للماء H₂O (H = 1، O = 16):',['16','17','18','20'],2,'2 + 16 = 18 جم/مول'],
+['chem','sec','غاز نبيل:',['الأكسجين','الهيليوم','الهيدروجين','النيتروجين'],1,'الهيليوم من المجموعة 18'],
+['chem','sec','تفاعل الحمض مع القاعدة يعطي:',['ملح وماء','ملح فقط','ماء فقط','غاز فقط'],0,'تفاعل التعادل'],
+['bio','sec','وحدة البناء والوظيفة في الكائنات الحية:',['النسيج','الخلية','العضو','الجهاز'],1,'الخلية'],
+['bio','sec','المادة الحاملة للصفات الوراثية:',['DNA','ATP','الجلوكوز','الدهون'],0,'الحمض النووي DNA'],
+['bio','sec','عدد الكروموسومات في الخلية الجسدية للإنسان:',['23','46','44','48'],1,'46 كروموسوماً (23 زوجاً)'],
+['bio','sec','ينتج الانقسام الميوزي:',['خليتين متماثلتين','أربع خلايا أحادية المجموعة','خلية واحدة','ثماني خلايا'],1,'ينتج الأمشاج'],
+['bio','sec','الإنزيم هو:',['بروتين محفّز','دهن','سكر','معدن'],0,'الإنزيمات بروتينات تسرّع التفاعلات'],
+['bio','sec','معظم ATP يُنتج في:',['الميتوكوندريا','جهاز جولجي','الريبوسوم','الفجوة'],0,'التنفس الخلوي'],
+['bio','sec','هرمون الأنسولين تفرزه:',['الكبد','البنكرياس','الكلية','الطحال'],1,'خلايا بيتا في البنكرياس'],
+['bio','sec','القاعدة المقابلة لـ A في DNA:',['T','G','C','U'],0,'A تقترن بـ T'],
+['eco','sec','يدرس علم الاقتصاد:',['كيفية استخدام الموارد المحدودة لإشباع حاجات غير محدودة','حركة الكواكب','تركيب المواد','قواعد اللغة'],0,'مشكلة الندرة هي أساس علم الاقتصاد'],
+['eco','sec','عند زيادة الطلب مع ثبات العرض يميل السعر إلى:',['الارتفاع','الانخفاض','الثبات','الصفر'],0,'زيادة الطلب تضغط الأسعار للأعلى'],
+['eco','sec','الناتج المحلي الإجمالي يقيس:',['قيمة السلع والخدمات النهائية المنتجة داخل الدولة في فترة','عدد السكان','الصادرات فقط','الديون'],0,'مقياس لحجم الاقتصاد'],
+['eco','sec','التضخم هو:',['ارتفاع عام ومستمر في مستوى الأسعار','انخفاض الأسعار','زيادة الإنتاج','ثبات الأجور'],0,'ارتفاع الأسعار وانخفاض القوة الشرائية'],
+['eco','sec','العلاقة بين السعر والكمية المطلوبة في قانون الطلب:',['عكسية','طردية','معدومة','ثابتة'],0,'كلما ارتفع السعر قلّت الكمية المطلوبة'],
+['eco','sec','من عوامل الإنتاج:',['الأرض والعمل ورأس المال والتنظيم','النقود فقط','الضرائب','الأسعار'],0,'عوامل الإنتاج الأربعة'],
+['geo','sec','يصب نهر النيل في مصر في:',['البحر المتوسط','البحر الأحمر','المحيط الأطلسي','الخليج العربي'],0,'عند دلتا النيل شمالاً'],
+['geo','sec','عاصمة السودان:',['الخرطوم','جوبا','أسمرة','أديس أبابا'],0,'الخرطوم عند التقاء النيلين'],
+['geo','sec','أعلى قمة جبلية في مصر:',['جبل كاترين','جبل موسى','جبل سيناء','جبل عتاقة'],0,'جبل كاترين في جنوب سيناء'],
+['geo','sec','درجة خط الاستواء:',['0°','23.5°','66.5°','90°'],0,'خط العرض صفر'],
+['geo','sec','أكبر قارات العالم مساحة:',['آسيا','أفريقيا','أوروبا','أمريكا الشمالية'],0,'آسيا'],
+['geo','sec','تربط قناة السويس بين:',['البحر المتوسط والبحر الأحمر','الأحمر والعربي','المتوسط والأطلسي','الأسود والمتوسط'],0,'اختصار الطريق بين أوروبا وآسيا'],
+['stat','sec','الوسيط للقيم 3، 5، 7، 9، 11:',['7','5','9','35'],0,'القيمة الوسطى بعد الترتيب'],
+['stat','sec','المنوال للقيم 2، 3، 3، 4، 5:',['3','2','4','5'],0,'القيمة الأكثر تكراراً'],
+['stat','sec','المدى للقيم 4، 9، 15:',['11','19','5','15'],0,'أكبر قيمة − أصغر قيمة = 15 − 4'],
+['stat','sec','الوسط الحسابي للقيم 10، 20، 30:',['20','10','30','60'],0,'(10 + 20 + 30) ÷ 3 = 20'],
+['stat','sec','احتمال ظهور الصورة عند إلقاء قطعة نقود منتظمة:',['1/2','1/3','1','0'],0,'نتيجتان متساويتان في الإمكان'],
+['stat','sec','احتمال ظهور عدد زوجي عند إلقاء حجر نرد منتظم:',['1/2','1/3','1/6','2/3'],0,'2 و4 و6 من ست نتائج'],
+['hist','sec','من وحّد القطرين مصر العليا والسفلى:',['الملك مينا (نارمر)','خوفو','رمسيس الثاني','أحمس'],0,'بداية الأسرة الأولى'],
+['hist','sec','بنى الهرم الأكبر في الجيزة الملك:',['خوفو','خفرع','منكاورع','زوسر'],0,'الهرم الأكبر لخوفو'],
+['hist','sec','افتُتحت قناة السويس للملاحة عام:',['1869','1798','1952','1914'],0,'في عهد الخديوي إسماعيل'],
+['hist','sec','قامت ثورة يوليو عام:',['1952','1919','1967','1973'],0,'23 يوليو 1952'],
+['hist','sec','كانت حرب أكتوبر المجيدة عام:',['1973','1967','1956','1948'],0,'6 أكتوبر 1973'],
+['hist','sec','تولى محمد علي حكم مصر عام:',['1805','1798','1882','1914'],0,'بداية الأسرة العلوية'],
+];
+
+/* ========== الامتحانات والتقييمات ========== */
+const BANK_ALIAS={bioA:['bio'],chemA:['chem'],physA:['phys'],mathA:['math'],isci:['phys','chem','bio'],calc:['math'],alg:['math'],stc:['phys'],dyn:['phys'],prog:[],ecoA:['eco'],geoA:['geo'],ehist:['hist']};
+const BAND_FALL={p13:['p13','p46'],p46:['p46','prep'],prep:['prep','p46','sec'],sec:['sec','prep']};
+let XREMOTE=[];
+function loadRemoteBank(){
+  try{XREMOTE=(st.get('xbank',[])||[]).filter(validQ)}catch(e){XREMOTE=[]}
+  if(!navigator.onLine||!/^https?:$/.test(location.protocol))return;
+  fetch('exams/bank.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{
+    if(!Array.isArray(j))return;const ok=j.filter(validQ).slice(0,3000);
+    if(ok.length){XREMOTE=ok;st.set('xbank',ok)}
+  }).catch(()=>{});
+}
+const validQ=q=>Array.isArray(q)&&q.length>=6&&typeof q[0]==='string'&&typeof q[1]==='string'&&typeof q[2]==='string'&&Array.isArray(q[3])&&q[3].length>=2&&q[3].length<=5&&q[3].every(x=>typeof x==='string')&&Number.isInteger(q[4])&&q[4]>=0&&q[4]<q[3].length&&typeof q[5]==='string';
+const allBank=()=>BANK0.concat(XREMOTE);
+const qid=q=>{let h=5381;const s=q[0]+q[1]+q[2];for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return 'q'+(h>>>0).toString(36)};
+function examBand(){const e=eduOf();if(!e)return 'prep';if(e.stage==='prim')return +e.grade<=3?'p13':'p46';if(e.stage==='prep')return 'prep';return 'sec'}
+function poolFor(subjKey,band){
+  const keys=BANK_ALIAS[subjKey]!==undefined?BANK_ALIAS[subjKey]:[subjKey];
+  const bands=BAND_FALL[band]||[band];
+  for(const b of bands){const p=allBank().filter(q=>keys.includes(q[0])&&q[1]===b);if(p.length)return p}
+  return [];
+}
+const examSubjects=()=>mySubs().filter(s=>poolFor(s.k,examBand()).length);
+function rng(seed){let a=0;for(let i=0;i<seed.length;i++)a=(a*31+seed.charCodeAt(i))|0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuf(a,r){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function weekId(){const d=Math.floor((Date.now()+3*3600e3)/864e5);return 'w'+Math.floor((d-2)/7)}
+function weekLabel(){const d=Math.floor((Date.now()+3*3600e3)/864e5),s=d-((d-2)%7+7)%7;return new Date(s*864e5).toLocaleDateString('ar-EG',{day:'numeric',month:'long',timeZone:'UTC'})}
+function buildQs(subjs,n,seed){
+  const r=rng(seed),band=examBand(),pools=subjs.map(s=>({s:s,p:shuf(poolFor(s.k,band),r)})),out=[];let i=0,guard=0;
+  while(out.length<n&&guard++<500){const x=pools[i%pools.length];i++;const q=x.p.shift();if(q&&!out.find(o=>o.id===qid(q)))out.push({id:qid(q),s:x.s.k,sn:x.s.n,q:q[2],o:q[3],a:q[4],e:q[5]});if(pools.every(z=>!z.p.length))break}
+  return shuf(out,r);
+}
+const XH=()=>st.get('xhist',[]);
+const saveXH=a=>st.set('xhist',a.slice(-120));
+const EX={on:false,qs:[],i:0,ans:[],done:false,meta:null};
+function exStart(qs,meta){if(!qs.length){toast('لا توجد أسئلة متاحة لهذه المادة بعد');return}EX.on=true;EX.qs=qs;EX.i=0;EX.ans=new Array(qs.length).fill(-1);EX.done=false;EX.meta=meta;EX.t0=Date.now();renderSec('exam')}
+ACT.exweek=()=>{
+  const subs=examSubjects();if(!subs.length){toast('اختر مرحلتك أولاً من الإعدادات');return}
+  exStart(buildQs(subs,10,weekId()+'|'+(userName()||me())),{type:'week',wk:weekId(),title:'امتحان الأسبوع'});
+};
+ACT.exprac=t=>{const s=mySubs().find(x=>x.k===t.dataset.k);if(!s)return;exStart(buildQs([s],10,'p'+Date.now()),{type:'prac',subj:s.k,title:'تدريب: '+s.n})};
+ACT.exmix=()=>{const subs=examSubjects();if(!subs.length){toast('اختر مرحلتك أولاً');return}exStart(buildQs(subs,10,'m'+Date.now()),{type:'mix',title:'تدريب متنوع'})};
+ACT.exans=t=>{if(EX.done)return;EX.ans[EX.i]=+t.dataset.i;renderSec('exam')};
+ACT.exnext=()=>{if(EX.i<EX.qs.length-1){EX.i++;renderSec('exam')}};
+ACT.exprev=()=>{if(EX.i>0){EX.i--;renderSec('exam')}};
+ACT.exgo=t=>{EX.i=+t.dataset.i;renderSec('exam')};
+ACT.exquit=()=>ask('إنهاء الامتحان بلا حفظ النتيجة؟','إنهاء',()=>{EX.on=false;renderSec('exam')},true);
+ACT.exfinish=()=>{
+  const un=EX.ans.filter(x=>x<0).length;
+  const fin=()=>{
+    const items=EX.qs.map((q,i)=>({id:q.id,s:q.s,ok:EX.ans[i]===q.a}));
+    const score=items.filter(x=>x.ok).length,h=XH();
+    const first=EX.meta.type==='week'&&!h.some(x=>x.type==='week'&&x.wk===EX.meta.wk);
+    h.push({at:Date.now(),type:EX.meta.type,wk:EX.meta.wk||'',subj:EX.meta.subj||'',score:score,total:EX.qs.length,off:first||EX.meta.type!=='week',items:items,mins:Math.round((Date.now()-EX.t0)/60000)});
+    saveXH(h);EX.done=true;EX.i=0;renderSec('exam');
+  };
+  if(un)ask('بقيت '+un+' أسئلة بلا إجابة. إنهاء الامتحان؟','إنهاء',fin);else fin();
+};
+ACT.exclose=()=>{EX.on=false;renderSec('exam')};
+ACT.exnew=()=>{EX.on=false;renderSec('exam')};
+function weekResult(){return XH().filter(x=>x.type==='week'&&x.wk===weekId()).sort((a,b)=>a.at-b.at)[0]||null}
+function pctOf(h){return h.total?Math.round(h.score/h.total*100):0}
+function grade(p){return p>=90?'ممتاز':p>=75?'جيد جداً':p>=60?'جيد':p>=50?'مقبول':'يحتاج مراجعة'}
+function weakSubjects(){
+  const h=XH(),m={};h.forEach(x=>x.items.forEach(i=>{(m[i.s]=m[i.s]||{o:0,t:0});m[i.s].t++;if(i.ok)m[i.s].o++}));
+  return Object.keys(m).map(k=>({k:k,p:Math.round(m[k].o/m[k].t*100),t:m[k].t})).filter(x=>x.t>=3).sort((a,b)=>a.p-b.p);
+}
+function exQuestion(){
+  const q=EX.qs[EX.i],ans=EX.ans[EX.i],n=EX.qs.length;
+  const nav='<div class="exdots">'+EX.qs.map((_,i)=>'<button class="exd'+(i===EX.i?' cur':'')+(EX.ans[i]>=0?' ans':'')+'" data-a="exgo" data-i="'+i+'" aria-label="سؤال '+(i+1)+'">'+(i+1)+'</button>').join('')+'</div>';
+  return '<div class="card"><h3><span>'+esc(EX.meta.title)+'</span><small>'+(EX.i+1)+' من '+n+'</small></h3>'+bar((EX.i+1)/n)+nav+
+    '<div class="mut sm" style="margin-top:10px">'+esc(q.sn)+'</div><div class="exq">'+esc(q.q)+'</div><div class="exopts">'+
+    q.o.map((o,i)=>'<button class="opt'+(ans===i?' sel':'')+'" data-a="exans" data-i="'+i+'">'+esc(o)+'</button>').join('')+'</div>'+
+    '<div class="row" style="margin-top:12px"><button class="btn g" data-a="exprev"'+(EX.i?'':' disabled')+'>السابق</button>'+
+    (EX.i<n-1?'<button class="btn" data-a="exnext">التالي</button>':'<button class="btn" data-a="exfinish">إنهاء وتصحيح</button>')+
+    '<button class="btn d s" data-a="exquit">خروج</button></div></div>';
+}
+function exResult(){
+  const items=EX.qs.map((q,i)=>({q:q,a:EX.ans[i]})),score=items.filter(x=>x.a===x.q.a).length,p=Math.round(score/EX.qs.length*100);
+  return '<div class="card glow"><h3><span>النتيجة</span><small>'+esc(EX.meta.title)+'</small></h3><div class="exscore">'+score+' من '+EX.qs.length+'</div><div class="b" style="text-align:center">'+p+'% · '+grade(p)+'</div>'+
+    '<div class="row" style="justify-content:center;margin-top:10px"><button class="btn" data-a="exnew">رجوع للامتحانات</button></div></div>'+
+    '<div class="card" style="margin-top:12px"><h3>الحلول والشرح</h3>'+items.map((x,i)=>{const ok=x.a===x.q.a;
+      return '<div class="exrev '+(ok?'ok':'no')+'"><div class="mut sm">'+(i+1)+'. '+esc(x.q.sn)+' · '+(ok?'إجابة صحيحة':x.a<0?'بلا إجابة':'إجابة خاطئة')+'</div><div class="b">'+esc(x.q.q)+'</div>'+
+      (ok?'':'<div class="sm">إجابتك: '+(x.a<0?'—':esc(x.q.o[x.a]))+'</div>')+'<div class="sm">الصحيح: <b>'+esc(x.q.o[x.q.a])+'</b></div><div class="mut sm">'+esc(x.q.e)+'</div></div>'}).join('')+'</div>';
+}
+function exHistory(){
+  const h=XH().slice().reverse().slice(0,12),w=weakSubjects();
+  const avg=h.length?Math.round(h.reduce((s,x)=>s+pctOf(x),0)/h.length):0;
+  return card('سجلي',(h.length?'<div class="mut sm">المتوسط في آخر '+h.length+' اختباراً: <b>'+avg+'%</b></div>':'<div class="empty">لا نتائج بعد. ابدأ بامتحان الأسبوع.</div>')+
+    (w.length?'<div class="mut sm" style="margin-top:8px">نقاط تحتاج مراجعة:</div><div class="chips" style="flex-wrap:wrap">'+w.slice(0,4).map(x=>'<span class="chip">'+esc(sub(x.k).n)+' · '+x.p+'%</span>').join('')+'</div>':'')+
+    (h.length?'<ul class="list" style="margin-top:8px">'+h.map(x=>'<li><span class="t">'+esc(x.type==='week'?'امتحان الأسبوع':x.type==='prac'?'تدريب: '+sub(x.subj).n:'تدريب متنوع')+'</span><small class="mut">'+new Date(x.at).toLocaleDateString('ar-EG',{day:'numeric',month:'short'})+' · '+x.score+' من '+x.total+'</small></li>').join('')+'</ul>':''));
+}
+RD.exam=()=>{
+  if(EX.on)return EX.done?exResult():exQuestion();
+  const e=eduOf();if(!e)return card('اختر مرحلتك','<p class="mut">حتى نجهّز لك امتحانات مواد مرحلتك.</p><button class="btn" data-a="edusheet">اختيار المرحلة</button>');
+  const subs=examSubjects(),wr=weekResult();
+  const wk=card('امتحان الأسبوع','<p class="mut sm">أسبوع '+weekLabel()+' · '+esc(eduLabel())+'. عشرة أسئلة من موادك، ويتجدد كل سبت.</p>'+
+    (wr?'<div class="exscore" style="font-size:1.6rem">'+wr.score+' من '+wr.total+'</div><div class="mut sm" style="text-align:center">'+grade(pctOf(wr))+' · نتيجتك الرسمية لهذا الأسبوع</div><div class="row" style="margin-top:10px"><button class="btn g" data-a="exweek">إعادة للتدريب</button></div>':'<div class="row"><button class="btn" data-a="exweek">ابدأ امتحان الأسبوع</button></div>'),{cls:'glow'});
+  const pr=card('تدريب حسب المادة',subs.length?'<div class="chips" style="flex-wrap:wrap">'+subs.map(s=>'<button class="chip" data-a="exprac" data-k="'+s.k+'" style="--c:'+s.c+'">'+esc(s.n)+'</button>').join('')+'</div><div class="row" style="margin-top:10px"><button class="btn g" data-a="exmix">تدريب متنوع</button></div>':'<div class="empty">لا أسئلة لمواد مرحلتك بعد. تُضاف باستمرار.</div>');
+  const miss=mySubs().filter(s=>!subs.find(x=>x.k===s.k));
+  const note='<p class="mut sm" style="margin-top:12px">تدريبات من إعداد التطبيق للمراجعة، وليست امتحانات الوزارة ولا نسخاً منها. '+(miss.length?'مواد لم تُضف أسئلتها بعد: '+miss.map(s=>esc(s.n)).join('، ')+'.':'')+'</p>';
+  return '<div class="grid">'+wk+pr+exHistory()+'</div>'+note;
+};
+PO.exam=()=>{};
 
 /* ========== الدخول والتشغيل ========== */
 async function unlock(){
@@ -2252,7 +2549,7 @@ function boot(){
   const h=(location.hash||'').slice(1),tab=SEC.find(s=>s.id===h)?h:st.get('tab','home');
   go(tab);
   clock();setInterval(clock,20000);
-  alarmInit();natInit();
+  alarmInit();natInit();loadRemoteBank();
   if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 }
 addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(SEC.find(s=>s.id===h)&&h!==curSec)go(h)});

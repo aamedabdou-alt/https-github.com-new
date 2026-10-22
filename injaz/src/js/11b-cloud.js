@@ -3,7 +3,7 @@
    - البيانات تُحفظ محلياً أولاً (تعمل بلا إنترنت) ثم تُرفع إلى جدول user_kv.
    - كل مستخدم يرى صفوفه فقط (RLS في قاعدة البيانات). */
 const CLOUD={on:false,client:null,user:null,q:{},timer:null,busy:false,last:0,err:'',off:false};
-const LOCAL_ONLY=['tab','snooze','wrem','wsh'];
+const LOCAL_ONLY=['tab','snooze','wrem','wsh','xbank'];
 const lsk=k=>'ab:'+k;
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
