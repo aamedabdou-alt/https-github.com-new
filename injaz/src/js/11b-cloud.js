@@ -103,8 +103,8 @@ function authMarkup(mode){
   return '<div class="auth-in"><div class="auth-logo"></div><h1>'+APP_NAME+'</h1><p class="mut">'+(su?'أنشئ حسابك ليحتفظ التطبيق ببياناتك.':'سجّل دخولك لمتابعة يومك.')+'</p>'+
   '<div class="chips auth-tabs"><button class="chip'+(su?'':' on')+'" data-a="authmode" data-m="in">دخول</button><button class="chip'+(su?' on':'')+'" data-a="authmode" data-m="up">حساب جديد</button></div>'+
   (su?'<label class="f">الاسم<input id="au-name" type="text" maxlength="40" autocomplete="name" placeholder="اسمك كما تحب أن يظهر"></label>':'')+
-  '<label class="f">اسم المستخدم<input id="au-user" type="text" dir="ltr" maxlength="24" autocapitalize="none" autocomplete="username" placeholder="مثال: ahmed.2008" style="text-align:left"></label>'+
-  '<label class="f">كلمة المرور<input id="au-pass" type="password" dir="ltr" maxlength="72" autocomplete="'+(su?'new-password':'current-password')+'" placeholder="8 أحرف على الأقل" style="text-align:left"></label>'+
+  '<label class="f">اسم المستخدم<input id="au-user" type="text" dir="ltr" maxlength="24" autocapitalize="none" autocomplete="username" placeholder="e.g. ahmed.2008" style="text-align:left"></label>'+
+  '<label class="f">كلمة المرور<input id="au-pass" type="password" dir="ltr" maxlength="72" autocomplete="'+(su?'new-password':'current-password')+'" placeholder="English only, 8+ characters" style="text-align:left"></label>'+
   (su?'<label class="f">تأكيد كلمة المرور<input id="au-pass2" type="password" dir="ltr" maxlength="72" autocomplete="new-password" style="text-align:left"></label><p class="mut sm" style="margin:0">لا توجد وسيلة لاستعادة كلمة المرور، فاحتفظ بها في مكان آمن.</p>':'')+
   '<div class="ar-msg bad" id="au-msg" role="alert"></div>'+
   '<button class="btn big" id="au-go" data-a="authgo" data-m="'+(su?'up':'in')+'">'+(su?'إنشاء الحساب':'دخول')+'</button>'+
@@ -123,6 +123,7 @@ ACT.authgo=async t=>{
   const name=up?(document.getElementById('au-name').value||'').trim().replace(/\s+/g,' '):'';
   if(up&&name.length<2)return authMsg('اكتب اسمك (حرفان على الأقل).');
   if(!/^[a-z0-9._]{3,24}$/.test(u))return authMsg('اسم المستخدم: 3 إلى 24 حرفاً إنجليزياً صغيراً أو أرقاماً أو . أو _');
+  if(!/^[\x21-\x7E]+$/.test(p))return authMsg('كلمة المرور بالإنجليزية فقط (حروف وأرقام ورموز) وبلا مسافات.');
   if(p.length<8)return authMsg('كلمة المرور 8 أحرف على الأقل.');
   if(up&&p!==document.getElementById('au-pass2').value)return authMsg('كلمتا المرور غير متطابقتين.');
   if(!navigator.onLine)return authMsg('تحتاج اتصالاً بالإنترنت لتسجيل الدخول أو إنشاء الحساب.');
@@ -137,6 +138,12 @@ ACT.authgo=async t=>{
     if(res===true){const el=document.getElementById('auth');if(el)el.remove();authDone&&authDone(true)}
   }catch(e){t.disabled=false;authMsg(CLOUD.msg(e))}
 };
+/* اسم المستخدم وكلمة المرور بالإنجليزية فقط: تُحذف أي أحرف غيرها أثناء الكتابة */
+document.addEventListener('input',e=>{
+  const t=e.target;if(!t||!t.id)return;
+  if(t.id==='au-user'){const v=t.value.toLowerCase().replace(/[^a-z0-9._]/g,'');if(v!==t.value){t.value=v;authMsg('اسم المستخدم بالإنجليزية فقط: حروف صغيرة وأرقام و . و _')}else authMsg('')}
+  else if(t.id==='au-pass'||t.id==='au-pass2'){const v=t.value.replace(/[^\x21-\x7E]/g,'');if(v!==t.value){t.value=v;authMsg('كلمة المرور بالإنجليزية فقط (حروف وأرقام ورموز) وبلا مسافات.')}else authMsg('')}
+});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('auth')){const b=document.getElementById('au-go');if(b&&!b.disabled)b.click()}});
 async function cloudGate(){
   if(!CLOUD.init())return true;
