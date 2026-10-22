@@ -37,3 +37,7 @@ begin
 end $$;
 revoke all on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
+
+-- صلاحيات واجهة البيانات (ضرورية إن كان "Automatically expose new tables" معطلاً)
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on public.user_kv to authenticated;
