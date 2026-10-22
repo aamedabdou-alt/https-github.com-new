@@ -70,7 +70,7 @@ let libCat='',libItems=[];
 const LCATS=['ملخصات','كتب','تمارين','أخرى'];
 RD.lib=()=>{
   const ls=libItems.filter(f=>!libCat||f.cat===libCat);
-  return '<div class="row" style="margin-bottom:10px"><label class="btn">رفع ملفات<input type="file" multiple hidden data-c="libup"></label><select data-c="libcat" aria-label="التصنيف">'+opts(LCATS,'ملخصات')+'</select><span class="mut sm">تُحفظ على جهازك فقط وتعمل دون إنترنت.</span></div>'+
+  return booksCard()+'<div class="row" style="margin-bottom:10px"><label class="btn">رفع ملفات<input type="file" multiple hidden data-c="libup"></label><select data-c="libcat" aria-label="التصنيف">'+opts(LCATS,'ملخصات')+'</select><span class="mut sm">تُحفظ على جهازك فقط وتعمل دون إنترنت.</span></div>'+
     '<div class="chips" style="margin-bottom:10px">'+chip(!libCat,'data-a="libf" data-c=""','الكل')+LCATS.map(c=>chip(libCat===c,'data-a="libf" data-c="'+c+'"',c)).join('')+'</div>'+
     (ls.length?'<div class="grid">'+ls.map(f=>'<div class="card"><h3><span>'+esc(f.name)+'</span></h3><div class="mut sm">'+esc(f.cat)+' · '+(f.size/1024<1024?Math.round(f.size/1024)+' ك.ب':(f.size/1048576).toFixed(1)+' م.ب')+'</div><div class="row" style="margin-top:8px"><button class="btn s" data-a="libopen" data-id="'+f.id+'">فتح</button><button class="btn g s" data-a="libdl" data-id="'+f.id+'">تنزيل</button><button class="x" data-a="libdel" data-id="'+f.id+'" aria-label="حذف">×</button></div></div>').join('')+'</div>':'<div class="empty">لا ملفات بعد. ارفع ملخصاتك وكتبك وملفات PDF.</div>');
 };
@@ -110,6 +110,7 @@ ACT.goaldel=t=>{st.set('goals',st.get('goals',[]).filter(g=>g.id!==t.dataset.id)
 /* ========== الإعدادات ========== */
 RD.set=()=>{
   const sk=SKINS.find(s=>s.id===skinIdFor(curSec));
+  const edc=card('المرحلة الدراسية','<p class="mut sm">'+(eduLabel()?'<b>'+esc(eduLabel())+'</b>':'لم تحدد بعد')+'</p><div class="row"><button class="btn" data-a="edusheet">تغيير المرحلة</button><button class="btn g" data-a="subsheet">موادي</button></div>');
   const bg=card('الخلفية','<p class="mut sm">الخلفية الحالية للقسم: <b>'+esc(sk?sk.n:'مخصصة')+'</b>. عندك جبال وغابات وأنهار وتلال وسماء وألوان وصورك الخاصة.</p><div class="row"><button class="btn" data-a="bgsheet">تغيير الخلفية</button><button class="btn g" data-a="themesheet">ألوان الخط والورق</button></div>');
   const loc=card('الموقع ومواقيت الصلاة','<div class="row"><label class="f grow">اسم المدينة<input type="text" value="'+esc(cfg.loc.name)+'" data-c="locn"></label></div><div class="row" style="margin-top:8px"><label class="f">خط العرض<input type="number" step="0.01" value="'+cfg.loc.lat+'" data-c="lat" style="width:110px"></label><label class="f">خط الطول<input type="number" step="0.01" value="'+cfg.loc.lng+'" data-c="lng" style="width:110px"></label><button class="btn g" data-a="geo" style="align-self:flex-end">موقعي الحالي</button></div>'+
     (()=>{const p=prayers(td());return '<div class="tiles" style="margin-top:12px">'+[['الفجر','fajr'],['الشروق','sunrise'],['الظهر','dhuhr'],['العصر','asr'],['المغرب','maghrib'],['العشاء','isha']].map(x=>'<div class="tile"><b class="num">'+t12(p[x[1]])+'</b><span>'+x[0]+'</span></div>').join('')+'</div>'})()+'<p class="mut sm">الحساب تقريبي بالطريقة المصرية. قارنه بتقويم مسجدك وعدّل الدقائق إن لزم.</p>');
@@ -117,7 +118,7 @@ RD.set=()=>{
   const nt=card('الإشعارات','<p class="mut sm">الحالة: <b>'+(window.Notification?({granted:'مفعّلة',denied:'محظورة من المتصفح',default:'لم تُفعّل بعد'})[Notification.permission]:'غير مدعومة')+'</b></p><button class="btn" data-a="notif">تفعيل الإشعارات</button><p class="mut sm" style="margin-top:8px">تُستخدم لتنبيهات المهام والمنبه والماء. يعمل التنبيه فقط والتطبيق مفتوح في الخلفية.</p>');
   const bk=card('النسخ الاحتياطي','<p class="mut sm">بياناتك محفوظة على هذا الجهاز فقط. صدّر نسخة بين وقت وآخر، واستعدها على أي جهاز.</p><div class="row"><button class="btn" data-a="bkexp">تصدير نسخة</button><label class="btn g">استيراد<input type="file" accept="application/json" hidden data-c="bkimp"></label></div><p class="mut sm" style="margin-top:8px">لا تشمل النسخة ملفات المكتبة وصورة الخلفية.</p>');
   const dg=card('منطقة حساسة','<div class="row"><button class="btn d" data-a="wipe">مسح كل البيانات</button></div>');
-  return '<div class="grid">'+bg+loc+sch+nt+bk+dg+'</div>';
+  return '<div class="grid">'+edc+bg+loc+sch+nt+bk+dg+'</div>';
 };
 CHG.locn=t=>{cfg.loc.name=t.value;saveCfg()};
 CHG.lat=t=>{cfg.loc.lat=num(t.value,30.59);saveCfg();renderSec('set')};

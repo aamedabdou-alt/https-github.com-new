@@ -3,7 +3,7 @@
    - البيانات تُحفظ محلياً أولاً (تعمل بلا إنترنت) ثم تُرفع إلى جدول user_kv.
    - كل مستخدم يرى صفوفه فقط (RLS في قاعدة البيانات). */
 const CLOUD={on:false,client:null,user:null,q:{},timer:null,busy:false,last:0,err:'',off:false};
-const LOCAL_ONLY=['tab','snooze','wrem'];
+const LOCAL_ONLY=['tab','snooze','wrem','wsh'];
 const lsk=k=>'ab:'+k;
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
@@ -161,7 +161,7 @@ async function cloudGate(){
 /* ----- الحساب ----- */
 ACT.account=()=>{
   const p=st.get('profile',{}),n=Object.keys(CLOUD.q).length;
-  sheet('<h3>حسابي</h3><div class="card" style="margin:8px 0"><div class="b">'+esc(p.name||'')+'</div><div class="mut sm" dir="ltr" style="text-align:right">@'+esc(p.username||'')+'</div></div>'+
+  sheet('<h3>حسابي</h3><div class="card" style="margin:8px 0"><div class="b">'+esc(p.name||'')+'</div><div class="mut sm">'+esc(eduLabel())+'</div><div class="mut sm" dir="ltr" style="text-align:right">@'+esc(p.username||'')+'</div></div>'+
    '<p class="mut sm">'+(CLOUD.err?esc(CLOUD.err):CLOUD.off?'أنت غير متصل. بياناتك محفوظة على هاتفك وسترفع عند عودة الإنترنت.':n?'جارٍ حفظ '+n+' عنصر في حسابك…':'كل بياناتك محفوظة في حسابك.')+'</p>'+
    '<div class="row" style="margin-top:10px"><button class="btn g" data-a="syncnow">مزامنة الآن</button><button class="btn g" data-a="logout">تسجيل الخروج</button></div>'+
    '<div class="row" style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px"><button class="btn d" data-a="delacct">حذف حسابي وبياناتي نهائياً</button></div><p class="mut sm">الحذف يمسح حسابك وكل بياناتك من الخادم ولا يمكن التراجع عنه.</p>');
@@ -177,7 +177,8 @@ ACT.delacct=()=>ask('سيُحذف حسابك وكل بياناتك نهائيا�
   try{await CLOUD.client.auth.signOut()}catch(e){}clearLocal();try{indexedDB.deleteDatabase('ab-bg');indexedDB.deleteDatabase('ab-lib')}catch(e){}location.reload();
 },true);
 CLOUD.mountUi=function(){
-  const t=document.querySelector('.tact');if(!t||t.querySelector('[data-a=account]'))return;
-  const b=document.createElement('button');b.className='ib';b.dataset.a='account';b.setAttribute('aria-label','حسابي');
-  b.innerHTML='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.6 3.8-5.4 7.5-5.4s6.6 1.8 7.5 5.4"/></svg>';t.insertBefore(b,t.firstChild);CLOUD.paint();
+  const t=document.querySelector('.tact');if(!t||t.querySelector('.whochip'))return;
+  const w=document.createElement('button');w.className='whochip';w.dataset.a=CLOUD.on?'account':'edusheet';w.textContent=firstName()||'حسابي';t.insertBefore(w,t.firstChild);
+  if(CLOUD.on){const b=document.createElement('button');b.className='ib';b.dataset.a='account';b.setAttribute('aria-label','حسابي');
+  b.innerHTML='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.6 3.8-5.4 7.5-5.4s6.6 1.8 7.5 5.4"/></svg>';t.insertBefore(b,w);CLOUD.paint()}
 };

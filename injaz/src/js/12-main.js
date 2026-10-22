@@ -5,7 +5,8 @@ async function unlock(){
   if(!ok)return;
   document.body.classList.remove('lock');const a=document.getElementById('auth');if(a)a.remove();
   if(!me()){await askName()}
-  boot();CLOUD.mountUi();welcome();
+  if(!eduOf()){await askStage()}
+  boot();CLOUD.mountUi();showWelcome();
 }
 function askName(){return new Promise(res=>{
   document.body.classList.add('lock');

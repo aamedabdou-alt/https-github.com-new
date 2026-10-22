@@ -349,6 +349,10 @@ body.lt .eyb b{color:#3d5bd0}
 .auth-logo{width:72px;height:72px;margin:0 auto;border-radius:18px;background:var(--logo) center/cover}
 .auth-tabs{justify-content:center}.ar-msg{min-height:18px;font-size:13px;color:#ff8a80}
 .ib.pend::after{content:"";position:absolute;top:6px;inset-inline-start:6px;width:8px;height:8px;border-radius:50%;background:#f5b942}
+
+.whochip{border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wis{margin:10px 0 0;max-width:640px;line-height:1.9;color:var(--mut)}
+.hero #who{font-size:13px;margin-top:2px}
 </style>
 </head>
 <body>
@@ -469,10 +473,10 @@ const saveCfg=()=>st.set('cfg',cfg);
 
 /* ========== المواد ========== */
 const BASE_SUB=[{k:'ar',n:'اللغة العربية',e:'Arabic',c:'#c8a27a'},{k:'en',n:'اللغة الإنجليزية',e:'English',c:'#8fb3ff'},{k:'math',n:'الرياضيات',e:'Math',c:'#7fb29a'},{k:'sci',n:'العلوم',e:'Science',c:'#7fbfae'},{k:'hist',n:'التاريخ',e:'History',c:'#d98c5f'}];
-const subs=()=>BASE_SUB.concat(cfg.subs||[]);
+const subs=()=>{const m=(typeof mySubs==='function')?mySubs():[];return (m.length?m:BASE_SUB).concat(cfg.subs||[])};
 const sub=k=>subs().find(s=>s.k===k)||{k:k,n:k==='rev'?'مراجعة':k==='read'?'القراءة':String(k),c:k==='rev'?'#b8a5ff':k==='read'?'#e8a1c9':'#a7b5b1'};
 const PLAN0={6:['ar','math','en','sci'],0:['en','sci','math','ar'],1:['math','ar','hist','en'],2:['hist','en','ar','math'],3:['ar','sci','en','math'],4:['en','hist','sci','rev'],5:['hist','rev','math','en']};
-const planOf=w=>(cfg.plan[w]&&cfg.plan[w].length?cfg.plan[w]:PLAN0[w]);
+const planOf=w=>(cfg.plan[w]&&cfg.plan[w].length?cfg.plan[w]:((typeof genPlan==='function'&&mySubs().length)?genPlan(w):PLAN0[w]));
 const winOf=w=>cfg.win[w]||[cfg.studyStart,cfg.studyEnd];
 const LD=()=>cfg.arabic.days.concat(cfg.prog.days);
 const isLessonDay=w=>cfg.arabic.days.includes(w)||cfg.prog.days.includes(w);
@@ -528,6 +532,78 @@ function cairoHour(){try{return(+new Intl.DateTimeFormat('en-GB',{timeZone:'Afri
 function greeting(){const h=cairoHour();return h>=5&&h<12?'صباح الخير':h>=12&&h<17?'نهارك سعيد':'مساء الخير'}
 const me=()=>(st.get('profile',{}).name||'').trim();
 const firstName=()=>me().split(/\s+/)[0]||'';
+
+/* ========== التعليم المصري: المراحل والصفوف والمسارات والمواد ========== */
+const PAL=['#c8a27a','#8fb3ff','#7fb29a','#7fbfae','#d98c5f','#b8a5ff','#e8a1c9','#e6c36a','#8ad0d6','#e08f9a','#a3c97a','#9aa8e8'];
+const S=(k,n)=>({k:k,n:n});
+const C={
+  ar:S('ar','اللغة العربية'),en:S('en','اللغة الإنجليزية'),l2:S('l2','لغة أجنبية ثانية'),math:S('math','الرياضيات'),
+  sci:S('sci','العلوم'),isci:S('isci','العلوم المتكاملة'),soc:S('soc','الدراسات الاجتماعية'),rel:S('rel','التربية الدينية'),
+  comp:S('comp','الحاسب الآلي'),art:S('art','التربية الفنية'),mus:S('mus','التربية الموسيقية'),pe:S('pe','التربية الرياضية'),
+  val:S('val','القيم واحترام الآخر'),hist:S('hist','التاريخ'),geo:S('geo','الجغرافيا'),phil:S('phil','الفلسفة والمنطق'),
+  psy:S('psy','علم النفس والاجتماع'),stat:S('stat','الإحصاء'),bio:S('bio','الأحياء'),chem:S('chem','الكيمياء'),phys:S('phys','الفيزياء'),
+  geol:S('geol','الجيولوجيا'),alg:S('alg','الجبر والهندسة الفراغية'),calc:S('calc','التفاضل والتكامل'),stc:S('stc','الاستاتيكا'),dyn:S('dyn','الديناميكا'),
+  ehist:S('ehist','التاريخ المصري'),fin:S('fin','الثقافة المالية'),prog:S('prog','البرمجة والذكاء الاصطناعي'),acc:S('acc','المحاسبة'),
+  biz:S('biz','إدارة الأعمال'),eco:S('eco','الاقتصاد'),
+  bioA:S('bioA','الأحياء (متقدم)'),chemA:S('chemA','الكيمياء (متقدم)'),mathA:S('mathA','الرياضيات (متقدم)'),physA:S('physA','الفيزياء (متقدم)'),
+  ecoA:S('ecoA','الاقتصاد (متقدم)'),geoA:S('geoA','الجغرافيا (متقدم)')
+};
+const G_AR=['الأول','الثاني','الثالث','الرابع','الخامس','السادس'];
+const EDU={
+  prim:{n:'المرحلة الابتدائية',g:[1,2,3,4,5,6],gn:g=>'الصف '+G_AR[g-1]+' الابتدائي'},
+  prep:{n:'المرحلة الإعدادية',g:[1,2,3],gn:g=>'الصف '+G_AR[g-1]+' الإعدادي'},
+  sec:{n:'الثانوية العامة',g:[1,2,3],gn:g=>(g===1?'الأول':g===2?'الثاني':'الثالث')+' الثانوي'},
+  bac:{n:'البكالوريا المصرية',g:[1,2,3],gn:g=>(g===1?'الأولى':g===2?'الثانية':'الثالثة')+' بكالوريا'}
+};
+const TRACKS={
+  sec:{sci:'علمي علوم',math:'علمي رياضة',lit:'أدبي'},
+  bac:{med:'الطب وعلوم الحياة',eng:'الهندسة وعلوم الحاسب',biz:'الأعمال',art:'الآداب والفنون'}
+};
+function eduSubjects(e){
+  if(!e||!e.stage)return [];
+  const st=e.stage,g=+e.grade,t=e.track;let L=[];
+  if(st==='prim'){
+    L=g<=3?[C.ar,C.math,C.en,C.rel,C.val,C.art,C.mus,C.pe]:[C.ar,C.math,C.en,C.sci,C.soc,C.rel,C.comp,C.art,C.pe];
+  }else if(st==='prep'){
+    L=[C.ar,C.en,C.math,C.sci,C.soc,C.l2,C.rel,C.comp,C.art,C.pe];
+  }else if(st==='sec'){
+    if(g===1)L=[C.ar,C.en,C.l2,C.math,C.isci,C.hist,C.geo,C.rel,C.comp,C.pe];
+    else if(t==='lit')L=[C.ar,C.en,C.l2,C.hist,C.geo,C.phil,C.psy,C.stat,C.rel];
+    else if(t==='math')L=g===2?[C.ar,C.en,C.l2,C.alg,C.calc,C.stc,C.dyn,C.phys,C.chem,C.rel]:[C.ar,C.en,C.l2,C.alg,C.calc,C.stc,C.dyn,C.phys,C.chem,C.rel];
+    else L=g===2?[C.ar,C.en,C.l2,C.bio,C.chem,C.phys,C.math,C.rel]:[C.ar,C.en,C.l2,C.bio,C.chem,C.phys,C.geol,C.rel];
+  }else if(st==='bac'){
+    if(g===1)L=[C.ar,C.en,C.l2,C.math,C.isci,C.ehist,C.prog,C.rel,C.fin,C.pe];
+    else if(g===2){
+      L=[C.ar,C.en,C.ehist];
+      const x={med:[C.math,C.phys],eng:[C.chem,C.prog],biz:[C.acc,C.biz],art:[C.psy,C.l2]}[t]||[];
+      L=L.concat(x,[C.fin,C.pe]);
+    }else{
+      const x={med:[C.bioA,C.chemA],eng:[C.mathA,C.physA],biz:[C.ecoA,C.math],art:[C.geoA,C.stat]}[t]||[];
+      L=x.concat([C.rel]);
+    }
+  }
+  return L.map((s,i)=>Object.assign({c:PAL[i%PAL.length],e:''},s));
+}
+const profile=()=>st.get('profile',{});
+const eduOf=()=>profile().edu||null;
+const eduLabel=e=>{e=e||eduOf();if(!e||!e.stage)return '';return EDU[e.stage].gn(+e.grade)+(e.track&&TRACKS[e.stage]?' · '+TRACKS[e.stage][e.track]:'')};
+const eduNeedsTrack=(s,g)=>(s==='sec'&&g>=2)||(s==='bac'&&g>=2);
+/* المواد الفعلية للطالب = مواد المرحلة (ما عدا ما أخفاه) + ما أضافه بنفسه */
+function mySubs(){
+  const e=eduOf(),off=(e&&e.off)||[];
+  return eduSubjects(e).filter(s=>!off.includes(s.k));
+}
+/* خطة أسبوعية تلقائية: تدوير المواد على أيام الأسبوع بأربع مواد يومياً */
+function genPlan(w){
+  const L=mySubs().map(s=>s.k);if(!L.length)return ['rev'];
+  const n=Math.min(4,L.length),start=((w+1)*3)%L.length,o=[];
+  for(let i=0;i<n;i++)o.push(L[(start+i)%L.length]);
+  if(w===5)o[n-1]='rev';
+  return o;
+}
+/* الكتب: كتاب الوزارة لكل مادة */
+const bookTitle=s=>'كتاب '+s.n+' – '+eduLabel();
+const bookSearch=s=>'https://www.google.com/search?q='+encodeURIComponent('كتاب الوزارة '+s.n+' '+eduLabel()+' pdf موقع وزارة التربية والتعليم المصرية');
 
 /* ========== محرّك الجدول اليومي ========== */
 function morning(k){
@@ -996,7 +1072,7 @@ RD.home=()=>{
     ring(f.kcal/lim,f.kcal,'السعرات','من '+lim,f.kcal>lim?'#e8806a':'#b7d68b','food')+
     ring(rd/cfg.read.target,Math.round(rd)+'د','القراءة','من '+cfg.read.target+' د','#e8a1c9','read')+
     ring(gymDay?(g&&g.done?1:0):1,gymDay?(g&&g.done?'تم':'—'):'راحة','التمرين',gymDay?(cfg.split[n.getDay()]||''):'يوم راحة','#ff9f6b','gym')+'</div>';
-  return '<div class="hero"><p class="mut" id="greet"></p><h1>'+esc(me()||'أهلاً بك')+'</h1>'+
+  return '<div class="hero"><p class="mut" id="greet"></p><h1>'+esc(me()||'أهلاً بك')+'</h1><div class="mut" id="who">'+whoHTML()+'</div><p class="wis">'+esc(wisdomNow())+'</p>'+
     '<div class="row mut"><span id="dt"></span><span id="tm"></span></div>'+
     '<div class="row" style="margin-top:10px"><span>باقٍ على الامتحان: <b id="left" class="ac">—</b> يوماً</span><input type="date" id="exam" data-c="exam" aria-label="موعد الامتحان"></div>'+
     '<div style="margin-top:14px;max-width:640px" id="hq"></div><button class="btn g s" data-a="newq" style="margin-top:6px">جملة أخرى</button></div>'+
@@ -1496,7 +1572,7 @@ let libCat='',libItems=[];
 const LCATS=['ملخصات','كتب','تمارين','أخرى'];
 RD.lib=()=>{
   const ls=libItems.filter(f=>!libCat||f.cat===libCat);
-  return '<div class="row" style="margin-bottom:10px"><label class="btn">رفع ملفات<input type="file" multiple hidden data-c="libup"></label><select data-c="libcat" aria-label="التصنيف">'+opts(LCATS,'ملخصات')+'</select><span class="mut sm">تُحفظ على جهازك فقط وتعمل دون إنترنت.</span></div>'+
+  return booksCard()+'<div class="row" style="margin-bottom:10px"><label class="btn">رفع ملفات<input type="file" multiple hidden data-c="libup"></label><select data-c="libcat" aria-label="التصنيف">'+opts(LCATS,'ملخصات')+'</select><span class="mut sm">تُحفظ على جهازك فقط وتعمل دون إنترنت.</span></div>'+
     '<div class="chips" style="margin-bottom:10px">'+chip(!libCat,'data-a="libf" data-c=""','الكل')+LCATS.map(c=>chip(libCat===c,'data-a="libf" data-c="'+c+'"',c)).join('')+'</div>'+
     (ls.length?'<div class="grid">'+ls.map(f=>'<div class="card"><h3><span>'+esc(f.name)+'</span></h3><div class="mut sm">'+esc(f.cat)+' · '+(f.size/1024<1024?Math.round(f.size/1024)+' ك.ب':(f.size/1048576).toFixed(1)+' م.ب')+'</div><div class="row" style="margin-top:8px"><button class="btn s" data-a="libopen" data-id="'+f.id+'">فتح</button><button class="btn g s" data-a="libdl" data-id="'+f.id+'">تنزيل</button><button class="x" data-a="libdel" data-id="'+f.id+'" aria-label="حذف">×</button></div></div>').join('')+'</div>':'<div class="empty">لا ملفات بعد. ارفع ملخصاتك وكتبك وملفات PDF.</div>');
 };
@@ -1536,6 +1612,7 @@ ACT.goaldel=t=>{st.set('goals',st.get('goals',[]).filter(g=>g.id!==t.dataset.id)
 /* ========== الإعدادات ========== */
 RD.set=()=>{
   const sk=SKINS.find(s=>s.id===skinIdFor(curSec));
+  const edc=card('المرحلة الدراسية','<p class="mut sm">'+(eduLabel()?'<b>'+esc(eduLabel())+'</b>':'لم تحدد بعد')+'</p><div class="row"><button class="btn" data-a="edusheet">تغيير المرحلة</button><button class="btn g" data-a="subsheet">موادي</button></div>');
   const bg=card('الخلفية','<p class="mut sm">الخلفية الحالية للقسم: <b>'+esc(sk?sk.n:'مخصصة')+'</b>. عندك جبال وغابات وأنهار وتلال وسماء وألوان وصورك الخاصة.</p><div class="row"><button class="btn" data-a="bgsheet">تغيير الخلفية</button><button class="btn g" data-a="themesheet">ألوان الخط والورق</button></div>');
   const loc=card('الموقع ومواقيت الصلاة','<div class="row"><label class="f grow">اسم المدينة<input type="text" value="'+esc(cfg.loc.name)+'" data-c="locn"></label></div><div class="row" style="margin-top:8px"><label class="f">خط العرض<input type="number" step="0.01" value="'+cfg.loc.lat+'" data-c="lat" style="width:110px"></label><label class="f">خط الطول<input type="number" step="0.01" value="'+cfg.loc.lng+'" data-c="lng" style="width:110px"></label><button class="btn g" data-a="geo" style="align-self:flex-end">موقعي الحالي</button></div>'+
     (()=>{const p=prayers(td());return '<div class="tiles" style="margin-top:12px">'+[['الفجر','fajr'],['الشروق','sunrise'],['الظهر','dhuhr'],['العصر','asr'],['المغرب','maghrib'],['العشاء','isha']].map(x=>'<div class="tile"><b class="num">'+t12(p[x[1]])+'</b><span>'+x[0]+'</span></div>').join('')+'</div>'})()+'<p class="mut sm">الحساب تقريبي بالطريقة المصرية. قارنه بتقويم مسجدك وعدّل الدقائق إن لزم.</p>');
@@ -1543,7 +1620,7 @@ RD.set=()=>{
   const nt=card('الإشعارات','<p class="mut sm">الحالة: <b>'+(window.Notification?({granted:'مفعّلة',denied:'محظورة من المتصفح',default:'لم تُفعّل بعد'})[Notification.permission]:'غير مدعومة')+'</b></p><button class="btn" data-a="notif">تفعيل الإشعارات</button><p class="mut sm" style="margin-top:8px">تُستخدم لتنبيهات المهام والمنبه والماء. يعمل التنبيه فقط والتطبيق مفتوح في الخلفية.</p>');
   const bk=card('النسخ الاحتياطي','<p class="mut sm">بياناتك محفوظة على هذا الجهاز فقط. صدّر نسخة بين وقت وآخر، واستعدها على أي جهاز.</p><div class="row"><button class="btn" data-a="bkexp">تصدير نسخة</button><label class="btn g">استيراد<input type="file" accept="application/json" hidden data-c="bkimp"></label></div><p class="mut sm" style="margin-top:8px">لا تشمل النسخة ملفات المكتبة وصورة الخلفية.</p>');
   const dg=card('منطقة حساسة','<div class="row"><button class="btn d" data-a="wipe">مسح كل البيانات</button></div>');
-  return '<div class="grid">'+bg+loc+sch+nt+bk+dg+'</div>';
+  return '<div class="grid">'+edc+bg+loc+sch+nt+bk+dg+'</div>';
 };
 CHG.locn=t=>{cfg.loc.name=t.value;saveCfg()};
 CHG.lat=t=>{cfg.loc.lat=num(t.value,30.59);saveCfg();renderSec('set')};
@@ -1834,7 +1911,7 @@ function alarmInit(){ensureOverlay();setInterval(alarmTick,1000);alarmTick()}
    - البيانات تُحفظ محلياً أولاً (تعمل بلا إنترنت) ثم تُرفع إلى جدول user_kv.
    - كل مستخدم يرى صفوفه فقط (RLS في قاعدة البيانات). */
 const CLOUD={on:false,client:null,user:null,q:{},timer:null,busy:false,last:0,err:'',off:false};
-const LOCAL_ONLY=['tab','snooze','wrem'];
+const LOCAL_ONLY=['tab','snooze','wrem','wsh'];
 const lsk=k=>'ab:'+k;
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
@@ -1992,7 +2069,7 @@ async function cloudGate(){
 /* ----- الحساب ----- */
 ACT.account=()=>{
   const p=st.get('profile',{}),n=Object.keys(CLOUD.q).length;
-  sheet('<h3>حسابي</h3><div class="card" style="margin:8px 0"><div class="b">'+esc(p.name||'')+'</div><div class="mut sm" dir="ltr" style="text-align:right">@'+esc(p.username||'')+'</div></div>'+
+  sheet('<h3>حسابي</h3><div class="card" style="margin:8px 0"><div class="b">'+esc(p.name||'')+'</div><div class="mut sm">'+esc(eduLabel())+'</div><div class="mut sm" dir="ltr" style="text-align:right">@'+esc(p.username||'')+'</div></div>'+
    '<p class="mut sm">'+(CLOUD.err?esc(CLOUD.err):CLOUD.off?'أنت غير متصل. بياناتك محفوظة على هاتفك وسترفع عند عودة الإنترنت.':n?'جارٍ حفظ '+n+' عنصر في حسابك…':'كل بياناتك محفوظة في حسابك.')+'</p>'+
    '<div class="row" style="margin-top:10px"><button class="btn g" data-a="syncnow">مزامنة الآن</button><button class="btn g" data-a="logout">تسجيل الخروج</button></div>'+
    '<div class="row" style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px"><button class="btn d" data-a="delacct">حذف حسابي وبياناتي نهائياً</button></div><p class="mut sm">الحذف يمسح حسابك وكل بياناتك من الخادم ولا يمكن التراجع عنه.</p>');
@@ -2008,9 +2085,10 @@ ACT.delacct=()=>ask('سيُحذف حسابك وكل بياناتك نهائيا�
   try{await CLOUD.client.auth.signOut()}catch(e){}clearLocal();try{indexedDB.deleteDatabase('ab-bg');indexedDB.deleteDatabase('ab-lib')}catch(e){}location.reload();
 },true);
 CLOUD.mountUi=function(){
-  const t=document.querySelector('.tact');if(!t||t.querySelector('[data-a=account]'))return;
-  const b=document.createElement('button');b.className='ib';b.dataset.a='account';b.setAttribute('aria-label','حسابي');
-  b.innerHTML='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.6 3.8-5.4 7.5-5.4s6.6 1.8 7.5 5.4"/></svg>';t.insertBefore(b,t.firstChild);CLOUD.paint();
+  const t=document.querySelector('.tact');if(!t||t.querySelector('.whochip'))return;
+  const w=document.createElement('button');w.className='whochip';w.dataset.a=CLOUD.on?'account':'edusheet';w.textContent=firstName()||'حسابي';t.insertBefore(w,t.firstChild);
+  if(CLOUD.on){const b=document.createElement('button');b.className='ib';b.dataset.a='account';b.setAttribute('aria-label','حسابي');
+  b.innerHTML='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.9-3.6 3.8-5.4 7.5-5.4s6.6 1.8 7.5 5.4"/></svg>';t.insertBefore(b,w);CLOUD.paint()}
 };
 
 /* ========== منبّهات النظام (Android عبر Capacitor) ==========
@@ -2062,6 +2140,89 @@ async function natSync(force){
   }catch(e){}
 }
 
+/* ========== اختيار المرحلة، الترحيب، الكتب ========== */
+const WIS={
+  m:['ابدأ بأصغر خطوة ممكنة؛ الدماغ يتحمّس بعد أن يبدأ لا قبل أن يبدأ.','لا تقارن بدايتك بنهاية غيرك. قارن نفسك بنفسك أمس.','ما تفعله أول النهار يحدد شعورك بقية اليوم، فاجعله شيئاً تفخر به.','الثقة لا تأتي قبل الإنجاز، بل تتكوّن بعد كل مهمة صغيرة تنهيها.','أخطاؤك ليست حكماً عليك، هي معلومات تخبرك ماذا تُصلح.','تنفّس بعمق، رتّب أولوية واحدة، ثم ابدأ بها.','الاستمرارية الهادئة أقوى من الحماس المتقطع.','أنت أقدر مما تظن، وأقوى مما شعرت به في أصعب يوم مرّ عليك.','التعب مؤقت، أما أثر المجهود فيبقى.','اختر اليوم أن تكون أفضل قليلاً، لا أن تكون مثالياً.','حين يصعب الأمر قسّمه؛ الجبل يُصعد خطوة خطوة.','ابتسم لنفسك قبل أن تفتح الكتاب، فالمعاملة الطيبة تحسّن الأداء.'],
+  d:['استراحة قصيرة لا تعني الفشل، بل هي جزء من الإنجاز.','حين تتشتت، عُد للتنفس ثم عُد للمهمة. لا تجلد نفسك.','التقدم البطيء تقدم. المهم ألا تتوقف.','قل لنفسك: أنا لا أعرف هذا بعد، ثم أضف: وسأتعلمه.','ركّز على ما تتحكم فيه: وقتك، وجهدك، وطريقتك.','الصعوبة علامة أنك تنمو، لا علامة أنك لا تصلح.','اطلب المساعدة حين تحتاجها؛ هذا ذكاء وليس ضعفاً.','قارن جهدك اليوم بجهدك الأمس، وستجد فرقاً يسعدك.','لا تنتظر شعور الرغبة؛ الانضباط يصنع الرغبة.','اكتب ما أنجزته اليوم، فالعين تحتاج أن ترى تقدمها.','ماء وحركة وهواء نقي، أبسط أدوات الذهن الصافي.','تذكّر لماذا بدأت، ولا تدع تعب اللحظة ينسيك هدفك.'],
+  e:['أحسنت أنك أكملت يومك. الراحة الآن جزء من المذاكرة.','لا تحاسب نفسك على ما لم تنجزه؛ احتفِ بما أنجزته وخطّط لغدٍ أفضل.','النوم الكافي يثبّت ما تعلمته، فلا تفرّط فيه.','اكتب ثلاثة أشياء سارة حدثت اليوم؛ الامتنان يهدّئ العقل.','القلق يخف حين تحوله إلى خطة صغيرة مكتوبة.','أنت لست مقصراً لأنك تعبت، أنت إنسان.','اترك الشاشة قبل النوم بنصف ساعة، وسيشكرك عقلك صباحاً.','يوم صعب لا يعني حياة صعبة. غداً صفحة جديدة.','قدّر نفسك على الجهد، لا على النتيجة وحدها.','رتّب ثلاث مهام الغد الآن، لتنام وعقلك مطمئن.','تحدّث مع شخص تحبه؛ الدعم الاجتماعي يخفف الضغط.','سامح نفسك على أخطاء اليوم، وخذ منها درساً واحداً فقط.']
+};
+const periodOf=()=>{const h=cairoHour();return h>=5&&h<12?'m':h>=12&&h<17?'d':'e'};
+function dayIdx(){const d=new Date();return Math.floor(d.getTime()/864e5)}
+const wisdomNow=()=>{const p=periodOf(),a=WIS[p];return a[dayIdx()%a.length]};
+const welcomeLine=()=>{const p=periodOf(),n=firstName();
+  return {m:'صباح النور',d:'أهلاً بك',e:'مساء النور'}[p]+(n?' يا '+n:'')};
+const userName=()=>profile().username||'';
+function whoHTML(){const u=userName(),e=eduLabel();return (u?'<span dir="ltr">@'+esc(u)+'</span>':'')+(u&&e?' · ':'')+esc(e)}
+
+/* ----- نموذج المرحلة ----- */
+function eduForm(cur,onSave,box){
+  cur=Object.assign({stage:'prim',grade:1,track:''},cur||{});
+  const draw=()=>{
+    const E=EDU[cur.stage],nt=eduNeedsTrack(cur.stage,+cur.grade);
+    if(!E.g.includes(+cur.grade))cur.grade=E.g[0];
+    if(!nt)cur.track='';else if(!TRACKS[cur.stage][cur.track])cur.track=Object.keys(TRACKS[cur.stage])[0];
+    box.innerHTML='<label class="f">المرحلة<select id="ed-s">'+Object.keys(EDU).map(k=>'<option value="'+k+'"'+(k===cur.stage?' selected':'')+'>'+EDU[k].n+'</option>').join('')+'</select></label>'+
+    '<label class="f">الصف<select id="ed-g">'+E.g.map(g=>'<option value="'+g+'"'+(g==cur.grade?' selected':'')+'>'+E.gn(g)+'</option>').join('')+'</select></label>'+
+    (nt?'<label class="f">'+(cur.stage==='bac'?'المسار':'الشعبة')+'<select id="ed-t">'+Object.keys(TRACKS[cur.stage]).map(k=>'<option value="'+k+'"'+(k===cur.track?' selected':'')+'>'+TRACKS[cur.stage][k]+'</option>').join('')+'</select></label>':'')+
+    '<div class="mut sm" style="margin:6px 0">المواد: '+eduSubjects(cur).map(s=>s.n).join(' · ')+'</div>'+
+    '<button class="btn big" id="ed-ok">حفظ</button>';
+    box.querySelector('#ed-s').onchange=e=>{cur.stage=e.target.value;cur.grade=EDU[cur.stage].g[0];cur.track='';draw()};
+    box.querySelector('#ed-g').onchange=e=>{cur.grade=+e.target.value;draw()};
+    const t=box.querySelector('#ed-t');if(t)t.onchange=e=>{cur.track=e.target.value;draw()};
+    box.querySelector('#ed-ok').onclick=()=>onSave({stage:cur.stage,grade:+cur.grade,track:cur.track,off:[]});
+  };
+  draw();
+}
+function saveEdu(e){const p=profile();const same=p.edu&&p.edu.stage===e.stage&&+p.edu.grade===+e.grade&&p.edu.track===e.track;p.edu=same?Object.assign(e,{off:p.edu.off||[]}):e;st.set('profile',p);if(!same){cfg.plan={};saveCfg()}}
+function askStage(){return new Promise(res=>{
+  document.body.classList.add('lock');
+  const el=document.createElement('div');el.id='auth';
+  el.innerHTML='<div class="auth-in"><div class="auth-logo"></div><h1>مرحلتك الدراسية</h1><p class="mut">اختر مرحلتك لنضيف موادك وكتبك تلقائياً.</p><div id="ed-box" style="display:flex;flex-direction:column;gap:10px;text-align:right"></div></div>';
+  document.body.appendChild(el);
+  eduForm(null,e=>{saveEdu(e);el.remove();document.body.classList.remove('lock');res()},el.querySelector('#ed-box'));
+})}
+ACT.edusheet=()=>{
+  sheet('<h3>المرحلة الدراسية</h3><div id="ed-box" style="display:flex;flex-direction:column;gap:10px"></div>',s=>{
+    eduForm(eduOf(),e=>{saveEdu(e);closeSheet();toast('تم تحديث موادك');renderSec(curSec)},s.querySelector('#ed-box'))});
+};
+ACT.subsheet=()=>{
+  const e=eduOf();if(!e){ACT.edusheet();return}
+  const all=eduSubjects(e),off=e.off||[];
+  sheet('<h3>موادي</h3><p class="mut sm">أخفِ ما لا تدرسه.</p><div class="chips" style="flex-wrap:wrap">'+all.map(s=>'<button class="chip'+(off.includes(s.k)?'':' on')+'" data-a="subtog" data-k="'+s.k+'">'+esc(s.n)+'</button>').join('')+'</div>');
+};
+ACT.subtog=t=>{const p=profile();if(!p.edu)return;const o=p.edu.off||[],k=t.dataset.k,i=o.indexOf(k);if(i<0)o.push(k);else o.splice(i,1);p.edu.off=o;st.set('profile',p);t.classList.toggle('on');cfg.plan={};saveCfg()};
+
+/* ----- الترحيب ----- */
+function showWelcome(){
+  const key=td()+periodOf();let seen='';try{seen=st.get('wsh','')}catch(e){}
+  if(seen===key)return;st.set('wsh',key);
+  const u=userName();
+  sheet('<div style="text-align:center;padding:6px 4px"><div class="mut sm">'+({m:'صباح الخير',d:'نهارك سعيد',e:'مساء الخير'}[periodOf()])+'</div><h2 style="margin:6px 0 4px">'+esc(me()||'أهلاً بك')+'</h2>'+
+   (u||eduLabel()?'<div class="mut sm">'+whoHTML()+'</div>':'')+
+   '<p style="margin:16px 0 4px;font-size:1.1rem;line-height:1.9">'+esc(wisdomNow())+'</p><button class="btn big" data-close style="margin-top:12px">لنبدأ</button></div>');
+}
+
+/* ----- الكتب ----- */
+const bookKey=s=>s.k+'|'+eduLabel();
+function booksCard(){
+  const e=eduOf();if(!e)return '';
+  const rows=mySubs().map(s=>{
+    const f=libItems.find(x=>x.bk===bookKey(s));
+    return '<li style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 0"><i style="width:10px;height:10px;border-radius:50%;background:'+s.c+'"></i><span class="t" style="flex:1;min-width:140px">'+esc(bookTitle(s))+'</span>'+
+    (f?'<button class="btn s" data-a="libopen" data-id="'+f.id+'">فتح</button>':'<a class="btn g s" href="'+bookSearch(s)+'" target="_blank" rel="noopener">بحث</a>')+
+    '<label class="btn g s">'+(f?'استبدال':'رفع')+'<input type="file" accept="application/pdf,.pdf" hidden data-c="bookup" data-k="'+s.k+'"></label></li>'}).join('');
+  return '<div class="card" style="margin-bottom:12px"><h3>كتب مرحلتي</h3><p class="mut sm">'+esc(eduLabel())+'. «بحث» يفتح نتائج عن كتاب الوزارة الرسمي، وبعد تنزيله ارفعه هنا ليبقى معك بلا إنترنت. الكتب على جهازك فقط.</p><ul class="list">'+rows+'</ul><div class="row" style="margin-top:8px"><a class="btn g s" href="https://moe.gov.eg" target="_blank" rel="noopener">موقع الوزارة</a><a class="btn g s" href="https://study.ekb.eg" target="_blank" rel="noopener">بنك المعرفة المصري</a></div></div>';
+}
+CHG.bookup=async t=>{
+  const f=t.files[0];if(!f)return;const s=mySubs().find(x=>x.k===t.dataset.k);if(!s)return;
+  try{
+    const old=libItems.find(x=>x.bk===bookKey(s));if(old)await libTx('readwrite',x=>x.delete(+old.id));
+    await libTx('readwrite',x=>x.add({name:bookTitle(s)+'.pdf',type:f.type,size:f.size,cat:'كتب',at:Date.now(),blob:f,bk:bookKey(s)}));
+    libItems=[];renderSec('lib');toast('أُضيف الكتاب');
+  }catch(err){toast('تعذر حفظ الكتاب')}
+  t.value='';
+};
+
 /* ========== الدخول والتشغيل ========== */
 async function unlock(){
   let ok=true;
@@ -2069,7 +2230,8 @@ async function unlock(){
   if(!ok)return;
   document.body.classList.remove('lock');const a=document.getElementById('auth');if(a)a.remove();
   if(!me()){await askName()}
-  boot();CLOUD.mountUi();welcome();
+  if(!eduOf()){await askStage()}
+  boot();CLOUD.mountUi();showWelcome();
 }
 function askName(){return new Promise(res=>{
   document.body.classList.add('lock');

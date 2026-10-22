@@ -24,7 +24,7 @@ RD.home=()=>{
     ring(f.kcal/lim,f.kcal,'السعرات','من '+lim,f.kcal>lim?'#e8806a':'#b7d68b','food')+
     ring(rd/cfg.read.target,Math.round(rd)+'د','القراءة','من '+cfg.read.target+' د','#e8a1c9','read')+
     ring(gymDay?(g&&g.done?1:0):1,gymDay?(g&&g.done?'تم':'—'):'راحة','التمرين',gymDay?(cfg.split[n.getDay()]||''):'يوم راحة','#ff9f6b','gym')+'</div>';
-  return '<div class="hero"><p class="mut" id="greet"></p><h1>'+esc(me()||'أهلاً بك')+'</h1>'+
+  return '<div class="hero"><p class="mut" id="greet"></p><h1>'+esc(me()||'أهلاً بك')+'</h1><div class="mut" id="who">'+whoHTML()+'</div><p class="wis">'+esc(wisdomNow())+'</p>'+
     '<div class="row mut"><span id="dt"></span><span id="tm"></span></div>'+
     '<div class="row" style="margin-top:10px"><span>باقٍ على الامتحان: <b id="left" class="ac">—</b> يوماً</span><input type="date" id="exam" data-c="exam" aria-label="موعد الامتحان"></div>'+
     '<div style="margin-top:14px;max-width:640px" id="hq"></div><button class="btn g s" data-a="newq" style="margin-top:6px">جملة أخرى</button></div>'+

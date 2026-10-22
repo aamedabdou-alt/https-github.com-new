@@ -73,10 +73,10 @@ const saveCfg=()=>st.set('cfg',cfg);
 
 /* ========== المواد ========== */
 const BASE_SUB=[{k:'ar',n:'اللغة العربية',e:'Arabic',c:'#c8a27a'},{k:'en',n:'اللغة الإنجليزية',e:'English',c:'#8fb3ff'},{k:'math',n:'الرياضيات',e:'Math',c:'#7fb29a'},{k:'sci',n:'العلوم',e:'Science',c:'#7fbfae'},{k:'hist',n:'التاريخ',e:'History',c:'#d98c5f'}];
-const subs=()=>BASE_SUB.concat(cfg.subs||[]);
+const subs=()=>{const m=(typeof mySubs==='function')?mySubs():[];return (m.length?m:BASE_SUB).concat(cfg.subs||[])};
 const sub=k=>subs().find(s=>s.k===k)||{k:k,n:k==='rev'?'مراجعة':k==='read'?'القراءة':String(k),c:k==='rev'?'#b8a5ff':k==='read'?'#e8a1c9':'#a7b5b1'};
 const PLAN0={6:['ar','math','en','sci'],0:['en','sci','math','ar'],1:['math','ar','hist','en'],2:['hist','en','ar','math'],3:['ar','sci','en','math'],4:['en','hist','sci','rev'],5:['hist','rev','math','en']};
-const planOf=w=>(cfg.plan[w]&&cfg.plan[w].length?cfg.plan[w]:PLAN0[w]);
+const planOf=w=>(cfg.plan[w]&&cfg.plan[w].length?cfg.plan[w]:((typeof genPlan==='function'&&mySubs().length)?genPlan(w):PLAN0[w]));
 const winOf=w=>cfg.win[w]||[cfg.studyStart,cfg.studyEnd];
 const LD=()=>cfg.arabic.days.concat(cfg.prog.days);
 const isLessonDay=w=>cfg.arabic.days.includes(w)||cfg.prog.days.includes(w);

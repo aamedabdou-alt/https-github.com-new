@@ -327,3 +327,7 @@ body.lt .eyb b{color:#3d5bd0}
 .auth-logo{width:72px;height:72px;margin:0 auto;border-radius:18px;background:var(--logo) center/cover}
 .auth-tabs{justify-content:center}.ar-msg{min-height:18px;font-size:13px;color:#ff8a80}
 .ib.pend::after{content:"";position:absolute;top:6px;inset-inline-start:6px;width:8px;height:8px;border-radius:50%;background:#f5b942}
+
+.whochip{border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wis{margin:10px 0 0;max-width:640px;line-height:1.9;color:var(--mut)}
+.hero #who{font-size:13px;margin-top:2px}
