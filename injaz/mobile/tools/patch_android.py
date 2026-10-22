@@ -31,3 +31,24 @@ for d,sz in {'mdpi':48,'hdpi':72,'xhdpi':96,'xxhdpi':144,'xxxhdpi':192}.items():
 for f in os.listdir(os.path.join(root,'app/src/main/res')):
     if f.startswith('mipmap-anydpi'): shutil.rmtree(os.path.join(root,'app/src/main/res',f))
 print('patched')
+
+# ----- توقيع الإصدار + رقم النسخة (لـ Google Play) -----
+bg=os.path.join(root,'app/build.gradle')
+g=open(bg,encoding='utf8').read()
+g=re.sub(r'versionCode \d+','versionCode '+os.environ.get('VCODE','1'),g)
+g=re.sub(r'versionName "[^"]*"','versionName "'+os.environ.get('VNAME','1.0.0')+'"',g)
+g+="""
+android {
+    signingConfigs {
+        release {
+            storeFile file(System.getenv('KS_FILE') ?: 'upload.jks')
+            storePassword System.getenv('KS_PASS')
+            keyAlias System.getenv('KS_ALIAS')
+            keyPassword System.getenv('KS_PASS')
+        }
+    }
+    buildTypes { release { signingConfig signingConfigs.release; minifyEnabled false } }
+}
+"""
+open(bg,'w',encoding='utf8').write(g)
+print('signing patched')
