@@ -13,8 +13,8 @@ jobs:
         with: { node-version: 20 }
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 17 }
-      - run: pip install pillow
-      - run: cp ../dist/index.html www/index.html
+      - run: pip install --break-system-packages pillow
+      - run: mkdir -p www && cp ../dist/index.html www/index.html
       - run: npm install
       - run: npx cap add android
       - run: python3 tools/patch_android.py android ../dist
