@@ -1936,7 +1936,7 @@ CLOUD.msg=e=>{
 };
 /* ----- الرفع ----- */
 cloudTouch=function(k){
-  if(!CLOUD.on||!CLOUD.user||LOCAL_ONLY.includes(k)||k.startsWith('__'))return;
+  if(!CLOUD.on||!CLOUD.user||LOCAL_ONLY.includes(k)||k.startsWith('__')||!/^[a-z0-9_.-]{1,64}$/.test(k))return;
   CLOUD.q[k]=1;lsSet('ab:__q',JSON.stringify(CLOUD.q));
   clearTimeout(CLOUD.timer);CLOUD.timer=setTimeout(CLOUD.flush,2500);CLOUD.paint();
 };
@@ -1946,7 +1946,7 @@ CLOUD.flush=async function(){
   if(!navigator.onLine){CLOUD.off=true;CLOUD.paint();return false}
   CLOUD.busy=true;
   try{
-    const rows=[];ks.forEach(k=>{const raw=lsGet(lsk(k));if(raw==null)return;try{rows.push({user_id:CLOUD.user.id,k:k,v:JSON.parse(raw)})}catch(e){}});
+    const rows=[],skip=[];ks.forEach(k=>{const raw=lsGet(lsk(k));if(raw==null||raw.length>250000){skip.push(k);return}try{rows.push({user_id:CLOUD.user.id,k:k,v:JSON.parse(raw)})}catch(e){skip.push(k)}});skip.forEach(k=>delete CLOUD.q[k]);
     if(rows.length){const r=await CLOUD.client.from('user_kv').upsert(rows,{onConflict:'user_id,k'});if(r.error)throw r.error}
     ks.forEach(k=>delete CLOUD.q[k]);lsSet('ab:__q',JSON.stringify(CLOUD.q));CLOUD.last=Date.now();CLOUD.err='';CLOUD.off=false;
   }catch(e){CLOUD.err=CLOUD.msg(e);clearTimeout(CLOUD.timer);CLOUD.timer=setTimeout(CLOUD.flush,30000)}
@@ -2078,7 +2078,7 @@ ACT.syncnow=async()=>{toast('جارٍ المزامنة…');const ok=await CLOUD
 ACT.logout=()=>ask('سيُسجَّل خروجك وتُزال بياناتك من هذا الجهاز (تبقى في حسابك). متابعة؟','تسجيل الخروج',async()=>{
   toast('جارٍ الحفظ…');const ok=await CLOUD.flush();
   if(!ok&&navigator.onLine&&Object.keys(CLOUD.q).length){toast('تعذر حفظ بعض البيانات. حاول لاحقاً.');return}
-  try{await CLOUD.client.auth.signOut()}catch(e){}clearLocal();try{indexedDB.deleteDatabase('ab-bg')}catch(e){}location.reload();
+  try{await CLOUD.client.auth.signOut()}catch(e){}clearLocal();try{indexedDB.deleteDatabase('ab-bg')}catch(e){}try{caches.keys().then(k=>k.forEach(x=>caches.delete(x)))}catch(e){}location.reload();
 });
 ACT.delacct=()=>ask('سيُحذف حسابك وكل بياناتك نهائياً من الخادم ومن هذا الجهاز. لا رجوع بعد ذلك.','حذف نهائي',async()=>{
   try{const r=await CLOUD.client.rpc('delete_my_account');if(r.error)throw r.error}catch(e){toast(CLOUD.msg(e));return}
