@@ -1,0 +1,9 @@
+{
+  "appId": "app.injaz.study",
+  "appName": "إنجاز",
+  "webDir": "www",
+  "android": { "allowMixedContent": false },
+  "plugins": {
+    "LocalNotifications": { "smallIcon": "ic_stat_icon", "iconColor": "#5b8def" }
+  }
+}
